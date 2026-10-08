@@ -35,6 +35,15 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.22.3
+      prisma:
+        specifier: ^5.15.0
+        version: 5.22.0
+      tsx:
+        specifier: ^4.9.1
+        version: 4.23.15
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -54,18 +63,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^2.0.5
         version: 2.1.9(vitest@2.1.9(@types/node@20.19.43))
-      prisma:
-        specifier: ^5.15.0
-        version: 5.22.0
       supertest:
         specifier: ^7.0.0
         version: 7.3.1
-      tsx:
-        specifier: ^4.9.1
-        version: 4.23.15
-      typescript:
-        specifier: ^5.5.0
-        version: 5.9.3
       vitest:
         specifier: ^2.0.5
         version: 2.1.9(@types/node@20.19.43)

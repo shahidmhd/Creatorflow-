@@ -3,7 +3,7 @@ services:
     name: creatorflow-api
     env: node
     plan: free
-    buildCommand: pnpm install --prod=false && pnpm --filter @creatorflow/api prisma:generate && pnpm --filter @creatorflow/api build
+    buildCommand: pnpm install --no-frozen-lockfile --prod=false && pnpm --filter @creatorflow/api prisma:generate && pnpm --filter @creatorflow/api build
     startCommand: pnpm --filter @creatorflow/api start
     envVars:
       - key: PORT

@@ -1,0 +1,2 @@
+import type { MetadataRoute } from "next";
+export default function sitemap(): MetadataRoute.Sitemap { return ["/","/brands","/customers","/creators","/agencies","/branding","/pricing","/how-it-works","/faq","/contact","/privacy","/terms","/discover","/onboarding","/launch-a-campaign","/book-a-demo","/blog","/dashboard"].map(path=>({url:`https://contentrewards.com${path}`,lastModified:new Date("2026-09-21"),changeFrequency:"weekly" as const,priority:path==="/" ? 1 : .7}));}

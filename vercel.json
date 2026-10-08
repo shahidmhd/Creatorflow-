@@ -1,6 +1,5 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npm run build --workspace @contentrewards/web",
-  "installCommand": "npm install",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @contentrewards/web build",
   "outputDirectory": "apps/web/.next"
 }

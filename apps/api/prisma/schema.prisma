@@ -1,0 +1,327 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CREATOR
+  EDITOR
+  ADMIN
+}
+
+enum CampaignStatus {
+  DRAFT
+  PUBLISHED
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+}
+
+enum PublishedPostStatus {
+  PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
+}
+
+enum RewardStatus {
+  PENDING
+  APPROVED
+  CREDITED
+  CANCELLED
+}
+
+enum WalletTransactionType {
+  REWARD
+  PLATFORM_FEE
+  ADJUSTMENT
+  REVERSAL
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  supabaseId     String   @unique
+  email          String   @unique
+  name           String
+  username       String   @unique
+  passwordHash   String?
+  role           Role
+  avatarUrl      String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  creatorProfile CreatorProfile?
+  editorProfile  EditorProfile?
+  campaigns      Campaign[]
+  applications   CampaignApplication[]
+  submissions    ContentSubmission[]
+  publishedPosts PublishedPost[]
+  rewards        Reward[]
+  wallet         Wallet?
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+  reports        Report[]
+
+  @@index([role])
+  @@index([email])
+}
+
+model CreatorProfile {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @db.Uuid
+  bio         String?
+  website     String?
+  socialLinks Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EditorProfile {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @db.Uuid
+  bio         String?
+  skills      String[]
+  portfolio   Json?
+  socialLinks Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Campaign {
+  id                     String         @id @default(uuid()) @db.Uuid
+  creatorId              String         @db.Uuid
+  title                  String
+  description            String
+  thumbnail              String?
+  category               String
+  socialPlatform         String
+  videoUrl               String?
+  rewardAmount           Int
+  maxEarn                Int?
+  campaignFund           Int            @default(0)
+  platformFeePercentage  Int            @default(15)
+  platformFee            Int            @default(0)
+  editorRewardPool       Int            @default(0)
+  editorSlots            Int            @default(1)
+  maximumEditorEarning   Int            @default(0)
+  earningPer1000Views    Int            @default(0)
+  currency               String         @default("INR")
+  deadline               DateTime
+  contentRequirements    String?
+  captionRequirements    String?
+  hashtagRequirements    String?
+  mentionRequirements    String?
+  minimumViews           Int            @default(0)
+  minimumEngagement      Int            @default(0)
+  additionalInstructions String?
+  status                 CampaignStatus @default(DRAFT)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+
+  creator                User           @relation(fields: [creatorId], references: [id])
+  applications           CampaignApplication[]
+  submissions            ContentSubmission[]
+  publishedPosts         PublishedPost[]
+  rewards                Reward[]
+
+  @@index([creatorId, status])
+  @@index([status, createdAt])
+}
+
+model CampaignApplication {
+  id         String            @id @default(uuid()) @db.Uuid
+  campaignId String            @db.Uuid
+  editorId   String            @db.Uuid
+  message    String?
+  status     ApplicationStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  campaign   Campaign          @relation(fields: [campaignId], references: [id])
+  editor     User              @relation(fields: [editorId], references: [id])
+
+  @@unique([campaignId, editorId])
+  @@index([campaignId, status])
+  @@index([editorId, status])
+}
+
+model ContentSubmission {
+  id            String           @id @default(uuid()) @db.Uuid
+  campaignId    String           @db.Uuid
+  editorId      String           @db.Uuid
+  contentUrl    String
+  caption       String?
+  notes         String?
+  feedback      String?
+  status        SubmissionStatus @default(DRAFT)
+  submittedAt   DateTime?
+  reviewedAt    DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  campaign      Campaign         @relation(fields: [campaignId], references: [id])
+  editor        User             @relation(fields: [editorId], references: [id])
+  publishedPost PublishedPost?
+
+  @@index([campaignId, editorId])
+  @@index([editorId, status])
+}
+
+model PublishedPost {
+  id                String              @id @default(uuid()) @db.Uuid
+  submissionId      String              @unique @db.Uuid
+  campaignId        String              @db.Uuid
+  editorId          String              @db.Uuid
+  postUrl           String
+  platform          String
+  verifiedViews     Int                 @default(0)
+  verificationNotes String?
+  status            PublishedPostStatus @default(PENDING_VERIFICATION)
+  verifiedAt        DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  submission        ContentSubmission   @relation(fields: [submissionId], references: [id])
+  campaign          Campaign            @relation(fields: [campaignId], references: [id])
+  editor            User                @relation(fields: [editorId], references: [id])
+  reward            Reward?
+
+  @@index([campaignId])
+  @@index([editorId])
+}
+
+model Reward {
+  id              String       @id @default(uuid()) @db.Uuid
+  publishedPostId String       @unique @db.Uuid
+  campaignId      String       @db.Uuid
+  editorId        String       @db.Uuid
+  verifiedViews   Int          @default(0)
+  calculatedAmount Int         @default(0)
+  grossAmount     Int
+  platformFee     Int
+  netAmount       Int
+  feePercentage   Int
+  status          RewardStatus @default(PENDING)
+  creditedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  publishedPost   PublishedPost @relation(fields: [publishedPostId], references: [id])
+  campaign        Campaign      @relation(fields: [campaignId], references: [id])
+  editor          User          @relation(fields: [editorId], references: [id])
+
+  @@index([editorId, status])
+  @@index([campaignId])
+}
+
+model Wallet {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @unique @db.Uuid
+  balance      Int                 @default(0)
+  currency     String              @default("INR")
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+
+  @@index([userId])
+}
+
+model WalletTransaction {
+  id          String                @id @default(uuid()) @db.Uuid
+  walletId    String                @db.Uuid
+  type        WalletTransactionType
+  amount      Int
+  balance     Int
+  description String
+  referenceId String?
+  metadata    Json?
+  createdAt   DateTime              @default(now())
+
+  wallet      Wallet                @relation(fields: [walletId], references: [id])
+
+  @@index([walletId, createdAt])
+  @@index([type])
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  type      String
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  actorId   String?  @db.Uuid
+  action    String
+  entity    String
+  entityId  String?
+  oldValue  Json?
+  newValue  Json?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  actor     User?    @relation(fields: [actorId], references: [id])
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+model Report {
+  id          String    @id @default(uuid()) @db.Uuid
+  reporterId  String    @db.Uuid
+  entityType  String
+  entityId    String    @db.Uuid
+  reason      String
+  description String?
+  resolved    Boolean   @default(false)
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  reporter    User      @relation(fields: [reporterId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([resolved])
+}
+
+model AdminSetting {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

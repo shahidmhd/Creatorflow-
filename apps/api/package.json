@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts"
@@ -23,6 +23,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "prisma": "^5.15.0",
+    "tsx": "^4.9.1",
+    "typescript": "^5.5.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -31,10 +34,7 @@
     "@types/node": "^20.14.0",
     "@types/supertest": "^6.0.2",
     "@vitest/coverage-v8": "^2.0.5",
-    "prisma": "^5.15.0",
     "supertest": "^7.0.0",
-    "tsx": "^4.9.1",
-    "typescript": "^5.5.0",
     "vitest": "^2.0.5"
   }
 }

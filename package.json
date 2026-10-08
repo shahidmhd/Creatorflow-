@@ -11,6 +11,11 @@
     "test": "pnpm -r test",
     "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache"
   },
+  "dependencies": {
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
   "devDependencies": {
     "next": "15.5.4",
     "react": "19.1.1",

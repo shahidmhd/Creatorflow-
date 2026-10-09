@@ -16,6 +16,18 @@ services:
           property: connectionString
       - key: APP_URL
         sync: false
+      - key: SUPABASE_URL
+        value: https://vanjvovulukpgzmattmr.supabase.co
+      - key: SUPABASE_ANON_KEY
+        value: sb_publishable_fnxOxp1h39hIJY0FrN6OLQ_LIs9MSJI
+      - key: SUPABASE_JWT_SECRET
+        value: QD7ZRQQLsb2OIyW6WPqanMgUrgElJIlNcfo6QzK5akcVweREQi0HiKRopQaSm1RtmFg99ZbiFUV+isjhi1sVBA==
+      - key: CLOUDINARY_CLOUD_NAME
+        value: fivwvyf3
+      - key: CLOUDINARY_API_KEY
+        value: 147622722473634
+      - key: CLOUDINARY_API_SECRET
+        value: Kw2t9XhO1azf3dujwiEWuuI1ofo
 
 databases:
   - name: creatorflow-db

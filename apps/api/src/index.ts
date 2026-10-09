@@ -8,6 +8,19 @@ async function main() {
   await prisma.$connect();
   console.log("✅ Database connected");
 
+  try {
+    await prisma.user.count();
+  } catch (err) {
+    console.log("🔄 Database tables not found or uninitialized. Syncing schema...", err);
+    try {
+      const { execSync } = await import("child_process");
+      execSync("npx prisma db push --accept-data-loss", { cwd: process.cwd(), stdio: "inherit" });
+      console.log("✅ Database schema synchronized successfully");
+    } catch (pushErr) {
+      console.error("❌ Failed to sync database schema:", pushErr);
+    }
+  }
+
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 CreatorFlow API running on port ${PORT}`);
     console.log(`   Environment: ${process.env.NODE_ENV ?? "development"}`);

@@ -10,17 +10,22 @@ export const auditLogService = {
     newValue: unknown,
     metadata?: Record<string, unknown>
   ) {
-    return prisma.auditLog.create({
-      data: {
-        actorId: actorId ?? undefined,
-        action,
-        entity,
-        entityId: entityId ?? undefined,
-        oldValue: oldValue as object | undefined,
-        newValue: newValue as object | undefined,
-        metadata: metadata as object | undefined,
-      },
-    });
+    try {
+      return await prisma.auditLog.create({
+        data: {
+          actorId: actorId ?? undefined,
+          action,
+          entity,
+          entityId: entityId ?? undefined,
+          oldValue: oldValue ? (oldValue as object) : undefined,
+          newValue: newValue ? (newValue as object) : undefined,
+          metadata: metadata ? (metadata as object) : undefined,
+        },
+      });
+    } catch (err) {
+      console.error("Audit log error:", err);
+      return null;
+    }
   },
 
   async findAll(filters: { entity?: string; actorId?: string; page?: number; limit?: number }) {

@@ -38,5 +38,6 @@ export function errorHandler(
   }
 
   console.error("Unexpected error:", err);
-  res.status(500).json({ success: false, error: "Internal server error" });
+  const details = err instanceof Error ? err.message : String(err);
+  res.status(500).json({ success: false, error: "Internal server error", details });
 }

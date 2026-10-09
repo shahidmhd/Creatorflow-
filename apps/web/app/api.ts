@@ -9,7 +9,9 @@ export interface UserSession {
   role: Role;
 }
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const cleanApiUrl = rawApiUrl.replace(/\/+$/, "");
+const apiBase = cleanApiUrl.endsWith("/api/v1") ? cleanApiUrl : `${cleanApiUrl}/api/v1`;
 
 function responseMessage(value: unknown): string | undefined {
   if (typeof value === "string") return value;

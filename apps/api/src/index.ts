@@ -8,8 +8,8 @@ async function main() {
   await prisma.$connect();
   console.log("✅ Database connected");
 
-  app.listen(PORT, () => {
-    console.log(`🚀 CreatorFlow API running on http://localhost:${PORT}`);
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 CreatorFlow API running on port ${PORT}`);
     console.log(`   Environment: ${process.env.NODE_ENV ?? "development"}`);
   });
 }

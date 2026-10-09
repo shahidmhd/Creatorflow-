@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: pnpm install --no-frozen-lockfile --prod=false && pnpm --filter @creatorflow/api prisma:generate && pnpm --filter @creatorflow/api build
-    startCommand: npx prisma db push --schema=apps/api/prisma/schema.prisma && npx tsx apps/api/prisma/seed.ts && pnpm --filter @creatorflow/api start
+    startCommand: npx prisma db push --accept-data-loss --schema=apps/api/prisma/schema.prisma && npx tsx apps/api/prisma/seed.ts && pnpm --filter @creatorflow/api start
     envVars:
       - key: PORT
         value: 10000

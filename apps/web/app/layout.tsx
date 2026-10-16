@@ -3,26 +3,26 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
-  title: { default: "CreatorFlow — Grow campaigns. Reward editors.", template: "%s | CreatorFlow" },
-  description: "CreatorFlow connects creators and editors through transparent campaigns, content approvals, and virtual rewards.",
+  title: { default: "Reviral — Long videos in. Short clips out.", template: "%s | Reviral" },
+  description: "Reviral connects brands with editors who cut long videos into viral short clips. Pay only for views that actually happen.",
   alternates: { canonical: "/" },
-  openGraph: { type: "website", siteName: "CreatorFlow", title: "Grow campaigns. Reward editors.", description: "Campaigns, approvals, and rewards in one platform." },
-  twitter: { card: "summary_large_image", title: "CreatorFlow", description: "The content rewards marketplace for creators and editors." },
+  openGraph: { type: "website", siteName: "Reviral", title: "Long videos in. Short clips out.", description: "Pay only for views that actually happen." },
+  twitter: { card: "summary_large_image", title: "Reviral", description: "Brands share footage. Editors cut clips. Everyone earns from real views." },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "CreatorFlow",
-    url: "https://creatorflow.app",
-    description: "Content rewards marketplace for creators and editors.",
+    name: "Reviral",
+    url: "https://reviral.app",
+    description: "Brands share long videos. Editors cut clips and post. Everyone earns from real views.",
   };
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
         {children}
-        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('creatorflow-theme')==='dark'||(!localStorage.getItem('creatorflow-theme')&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{const t=localStorage.getItem('reviral-theme')||localStorage.getItem('creatorflow-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}` }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
       </body>
     </html>

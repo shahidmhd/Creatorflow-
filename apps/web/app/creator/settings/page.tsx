@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, Globe, Instagram, Sparkles, Twitter, Youtube, User } from "lucide-react";
-import { api } from "@/app/api";
+import { api, getAuthSession } from "@/app/api";
 
 export default function CreatorSettingsPage() {
   const [saved, setSaved] = useState(false);
@@ -49,9 +49,8 @@ export default function CreatorSettingsPage() {
       })
       .catch(() => {
         // Fallback to local session
-        const raw = localStorage.getItem("creatorflow-session");
-        if (raw) {
-          const s = JSON.parse(raw);
+        const s = getAuthSession();
+        if (s) {
           setForm((prev) => ({
             ...prev,
             name: s.name || s.username || "Creator",

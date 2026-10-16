@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BriefcaseBusiness, LayoutDashboard, LogOut, User, Wallet, CheckCircle } from "lucide-react";
+import { getAuthSession, clearAuthData } from "../api";
 
 const navItems = [
   { label: "Overview", href: "/editor", Icon: LayoutDashboard },
@@ -18,30 +19,23 @@ export default function EditorLayout({ children }: { children: React.ReactNode }
   const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    const rawSession = localStorage.getItem("creatorflow-session");
-    if (!rawSession) {
+    const session = getAuthSession();
+    if (!session) {
+      clearAuthData();
       window.location.replace("/?auth=editor-login");
       return;
     }
 
-    try {
-      const session = JSON.parse(rawSession) as { role?: string };
-      if (session.role !== "EDITOR") {
-        const dest = session.role === "CREATOR" ? "/creator" : session.role === "ADMIN" ? "/admin" : "/";
-        window.location.replace(dest);
-        return;
-      }
-      setCheckingSession(false);
-    } catch {
-      localStorage.removeItem("creatorflow-session");
-      localStorage.removeItem("creatorflow-token");
-      window.location.replace("/?auth=editor-login");
+    if (session.role !== "EDITOR") {
+      const dest = session.role === "CREATOR" ? "/creator" : session.role === "ADMIN" ? "/admin" : "/";
+      window.location.replace(dest);
+      return;
     }
+    setCheckingSession(false);
   }, []);
 
   const logout = () => {
-    localStorage.removeItem("creatorflow-session");
-    localStorage.removeItem("creatorflow-token");
+    clearAuthData();
     window.location.replace("/");
   };
 

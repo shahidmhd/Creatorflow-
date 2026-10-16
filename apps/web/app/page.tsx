@@ -1,45 +1,37 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowRight,
-  Check,
   CircleUserRound,
-  Filter,
-  Flame,
-  Globe,
   Mail,
-  Search,
   ShieldCheck,
-  Sparkles,
-  TrendingUp,
   X,
+  Play,
+  Eye,
+  IndianRupee,
+  Scissors,
 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
-import { Footer, PublicNav, StatusBadge, CampaignCard, CampaignCardData } from "./components";
-import { authApi, api, UserSession } from "./api";
+import { Footer, PublicNav, CampaignCard, CampaignCardData } from "./components";
+import { authApi, api, UserSession, setAuthData } from "./api";
 
-const faqs = [
-  "How much does CreatorFlow charge?",
-  "How do creators launch and fund campaigns?",
-  "How are editor reward payouts computed?",
-  "Can an editor request changes or resubmit content?",
-];
-
+/* ─── Fallback campaign data ─────────────────────────────── */
 const fallbackCampaigns: CampaignCardData[] = [
   {
     id: "c-1",
     title: "Summer Viral Reels Challenge",
-    description: "Produce dynamic 9:16 vertical edits featuring fast-paced hooks, aesthetic typography overlays, and sound design.",
+    description: "Produce dynamic 9:16 vertical edits featuring fast-paced hooks and aesthetic typography.",
     thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60",
     category: "Fashion",
     socialPlatform: "Instagram",
     campaignFund: 100000,
     rewardAmount: 100000,
     editorSlots: 10,
-    maximumEditorEarning: 8500, // ₹85
-    earningPer1000Views: 850, // ₹8.50 per 1k views
+    maximumEditorEarning: 8500,
+    earningPer1000Views: 850,
     minimumViews: 10000,
     approvedEditorsCount: 7,
     remainingSlots: 3,
@@ -49,15 +41,15 @@ const fallbackCampaigns: CampaignCardData[] = [
   {
     id: "c-2",
     title: "Next-Gen Tech Gadget Unboxing Short",
-    description: "Snappy, high-retention product unboxings highlighting specs, visual close-ups, and punchy transitions.",
+    description: "Snappy high-retention product unboxings highlighting specs and punchy transitions.",
     thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=60",
     category: "Tech",
     socialPlatform: "YouTube",
     campaignFund: 250000,
     rewardAmount: 250000,
     editorSlots: 5,
-    maximumEditorEarning: 42500, // ₹425
-    earningPer1000Views: 1500, // ₹15.00 per 1k views
+    maximumEditorEarning: 42500,
+    earningPer1000Views: 1500,
     minimumViews: 25000,
     approvedEditorsCount: 2,
     remainingSlots: 3,
@@ -67,15 +59,15 @@ const fallbackCampaigns: CampaignCardData[] = [
   {
     id: "c-3",
     title: "High-Intensity Fitness Transformation Reel",
-    description: "Sync motivational voiceovers with workout montage clips and bass-heavy audio pacing.",
-    thumbnail: null, // Test dummy image display
+    description: "Sync motivational voiceovers with workout montage clips and bass-heavy audio.",
+    thumbnail: null,
     category: "Fitness",
     socialPlatform: "Instagram",
     campaignFund: 150000,
     rewardAmount: 150000,
     editorSlots: 8,
-    maximumEditorEarning: 15937, // ₹159.37
-    earningPer1000Views: 1200, // ₹12.00 per 1k views
+    maximumEditorEarning: 15937,
+    earningPer1000Views: 1200,
     minimumViews: 12000,
     approvedEditorsCount: 4,
     remainingSlots: 4,
@@ -85,15 +77,15 @@ const fallbackCampaigns: CampaignCardData[] = [
   {
     id: "c-4",
     title: "Epic Gaming Highlights & Montage Series",
-    description: "Transform raw stream VODs into viral YouTube Shorts with kinetic zoom-ins and sound effects.",
+    description: "Transform raw stream VODs into viral YouTube Shorts with kinetic zoom-ins.",
     thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
     category: "Gaming",
     socialPlatform: "YouTube",
     campaignFund: 180000,
     rewardAmount: 180000,
     editorSlots: 6,
-    maximumEditorEarning: 25500, // ₹255
-    earningPer1000Views: 1000, // ₹10.00 per 1k views
+    maximumEditorEarning: 25500,
+    earningPer1000Views: 1000,
     minimumViews: 20000,
     approvedEditorsCount: 1,
     remainingSlots: 5,
@@ -102,6 +94,27 @@ const fallbackCampaigns: CampaignCardData[] = [
   },
 ];
 
+/* ─── FAQ data ───────────────────────────────────────────── */
+const faqs = [
+  {
+    q: "How much does Reviral charge?",
+    a: "Reviral keeps 15% of every verified payout. If a clip gets no views, it costs nothing. You only pay for real, verified views.",
+  },
+  {
+    q: "How do brands launch and fund campaigns?",
+    a: "Sign up as a brand, create a campaign brief, set your budget and view rate (e.g. ₹200 per 1,000 views). Editors apply, create clips, and post them. You're charged only when views are verified.",
+  },
+  {
+    q: "How are editor payouts calculated?",
+    a: "Your verified views × your campaign's rate per 1,000 = gross payout. Reviral deducts 15% and the rest goes straight to your wallet.",
+  },
+  {
+    q: "Can an editor resubmit content after feedback?",
+    a: "Yes. Brands can request changes with a written note. Editors revise and resubmit. Only SUBMITTED content that gets approved moves to the publishing stage.",
+  },
+];
+
+/* ─── Page shell ─────────────────────────────────────────── */
 export default function Home() {
   return (
     <Suspense fallback={<main className="min-h-screen bg-paper" aria-busy="true" />}>
@@ -110,66 +123,61 @@ export default function Home() {
   );
 }
 
+/* ─── Main content ───────────────────────────────────────── */
+function getFlowFromParam(param: string | null): "creator" | "editor" | "admin" {
+  if (param === "admin-login") return "admin";
+  if (param?.startsWith("editor-") || param?.startsWith("clipper-")) return "editor";
+  return "creator";
+}
+
 function HomeContent() {
   const searchParams = useSearchParams();
   const auth = searchParams.get("auth");
   const isAuthFlow =
-    auth === "creator-login" ||
-    auth === "creator-create" ||
-    auth === "editor-login" ||
-    auth === "editor-create" ||
+    auth === "creator-login" || auth === "creator-create" ||
+    auth === "editor-login" || auth === "editor-create" ||
+    auth === "brand-login" || auth === "brand-create" ||
+    auth === "clipper-login" || auth === "clipper-create" ||
     auth === "admin-login";
 
+  const initialFlow = getFlowFromParam(auth);
   const [authOpen, setAuthOpen] = useState(isAuthFlow);
-  const [authMode, setAuthMode] = useState<"create" | "login">(auth?.endsWith("-login") ? "login" : "create");
-  const [authFlow, setAuthFlow] = useState<"creator" | "editor" | "admin">(
-    auth === "admin-login" ? "admin" : auth?.startsWith("editor-") ? "editor" : "creator"
+  const [authMode, setAuthMode] = useState<"create" | "login">(
+    initialFlow === "admin" ? "login" : auth?.endsWith("-login") ? "login" : "create"
   );
-  const [form, setForm] = useState({ name: "", email: "", username: "", password: "", otp: "" });
+  const [authFlow, setAuthFlow] = useState<"creator" | "editor" | "admin">(initialFlow);
+  const [form, setForm] = useState({ name: "", email: "", username: "", password: "" });
   const [authNotice, setAuthNotice] = useState("");
-
-  // Campaign State & Filtering
   const [campaigns, setCampaigns] = useState<CampaignCardData[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
-  const [selectedPlatform, setSelectedPlatform] = useState("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
     if (isAuthFlow && auth) {
-      setAuthFlow(auth === "admin-login" ? "admin" : auth.startsWith("editor-") ? "editor" : "creator");
-      setAuthMode(auth.endsWith("-login") ? "login" : "create");
+      const flow = getFlowFromParam(auth);
+      setAuthFlow(flow);
+      setAuthMode(flow === "admin" ? "login" : auth.endsWith("-login") ? "login" : "create");
       setAuthOpen(true);
     }
   }, [auth, isAuthFlow]);
 
-  // Load campaigns from backend API
   useEffect(() => {
     api<CampaignCardData[]>("/campaigns")
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCampaigns(data);
-        } else {
-          setCampaigns(fallbackCampaigns);
-        }
-      })
-      .catch(() => {
-        setCampaigns(fallbackCampaigns);
-      });
+      .then((data) => setCampaigns(Array.isArray(data) && data.length > 0 ? data : fallbackCampaigns))
+      .catch(() => setCampaigns(fallbackCampaigns));
   }, []);
 
-  const applyField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
+  const applyField = (field: string, value: string) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
   const submitAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthNotice("");
-
     try {
       if (authMode === "create") {
         if (!form.username.trim() || !form.email.trim() || !form.password.trim()) {
           setAuthNotice("Please provide all required fields.");
           return;
         }
-
         const role = authFlow === "editor" ? "EDITOR" : "CREATOR";
         const fakeSupabaseId = "sb_" + Math.random().toString(36).substring(2, 11);
         const user = await authApi<UserSession>("/auth/register", {
@@ -180,9 +188,8 @@ function HomeContent() {
           password: form.password,
           role,
         });
-
-        localStorage.setItem("creatorflow-session", JSON.stringify(user));
-        localStorage.setItem("creatorflow-token", "creatorflow_token_" + user.id);
+        const token = "creatorflow_token_" + user.id;
+        setAuthData(token, user);
         window.location.href = role === "EDITOR" ? "/editor" : "/creator";
       } else {
         const expectedRole = authFlow === "admin" ? "ADMIN" : authFlow === "editor" ? "EDITOR" : "CREATOR";
@@ -190,255 +197,335 @@ function HomeContent() {
           username: form.username.trim(),
           password: form.password,
         });
-
         if (res.user.role !== expectedRole) {
-          setAuthNotice(`This account is a ${res.user.role} account. Please choose the correct sign in section.`);
+          setAuthNotice(`This is a ${res.user.role} account. Please use the correct sign-in section.`);
           return;
         }
-
-        localStorage.setItem("creatorflow-session", JSON.stringify(res.user));
-        localStorage.setItem("creatorflow-token", res.token);
-        window.location.href = res.user.role === "ADMIN" ? "/admin/settings" : res.user.role === "EDITOR" ? "/editor" : "/creator";
+        setAuthData(res.token, res.user);
+        window.location.href =
+          res.user.role === "ADMIN" ? "/admin/settings" :
+          res.user.role === "EDITOR" ? "/editor" : "/creator";
       }
     } catch (error) {
       setAuthNotice(error instanceof Error ? error.message : "Authentication failed");
     }
   };
 
-  // Filtered campaigns
-  const filteredCampaigns = campaigns.filter((c) => {
-    const matchesCategory = selectedCategory === "ALL" || c.category.toUpperCase() === selectedCategory.toUpperCase();
-    const matchesPlatform = selectedPlatform === "ALL" || c.socialPlatform.toUpperCase() === selectedPlatform.toUpperCase();
-    const matchesSearch =
-      !searchQuery.trim() ||
-      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.description || "").toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesPlatform && matchesSearch;
-  });
-
   return (
     <>
       <PublicNav />
       <main>
-        {/* HERO BANNER */}
-        <section className="relative overflow-hidden bg-surface px-6 pb-20 pt-16 text-center md:pb-28 md:pt-24">
-          <div className="absolute inset-x-0 bottom-0 h-64 bg-[radial-gradient(ellipse_at_center,_rgba(23,52,92,0.12),_transparent_68%)]" />
-          <div className="container relative">
-            <div className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-white/80 px-4 py-1.5 text-xs font-bold text-navy shadow-sm backdrop-blur mb-6">
-              <Sparkles size={14} /> Performance Rewards Marketplace for Creators & Editors
-            </div>
 
-            <h1 className="mx-auto max-w-4xl text-5xl font-black leading-[0.9] tracking-[-0.06em] md:text-8xl">
-              Grow campaigns.<br />
-              <span className="text-navy">Reward editors.</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-neutral-600">
-              Creators post creative briefs with guaranteed gross rewards. Editors apply, edit viral cuts, publish, and receive transparent 85% payouts.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link
-                href="/?auth=creator-create"
-                className="rounded-full bg-navy px-6 py-3.5 font-bold text-white shadow-navy hover:opacity-95"
-              >
-                Launch a campaign <ArrowRight className="ml-1 inline" size={16} />
-              </Link>
-              <Link
-                href="/?auth=editor-create"
-                className="rounded-full border border-navy/20 bg-white px-6 py-3.5 font-bold text-neutral-800 hover:bg-neutral-50"
-              >
-                Join as Editor
-              </Link>
+        {/* ══════════════════════════════════════════════════
+            HERO — compact, step 1 image only
+        ══════════════════════════════════════════════════ */}
+        <section className="relative overflow-hidden bg-white px-6 py-16 md:py-20">
+          <div className="container">
+            <div className="grid gap-10 md:grid-cols-2 md:items-center">
+              {/* Left: copy */}
+              <div>
+                <p className="text-sm font-black uppercase tracking-[.18em] text-navy mb-4">
+                  Long videos in. Short clips out.
+                </p>
+                <h1 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-[-0.05em] text-neutral-900">
+                  Every great moment deserves a second&nbsp;life.
+                </h1>
+                <p className="mt-5 max-w-md text-base leading-7 text-neutral-500">
+                  Got a long video, like a podcast or a talk? Editors on Reviral cut it into
+                  short clips and post them online. You set a budget and pay only for the views
+                  those clips really get.
+                </p>
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <Link
+                    href="/?auth=creator-create"
+                    id="cta-footage"
+                    className="inline-flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-black text-white shadow-navy hover:opacity-95 transition"
+                  >
+                    I have the footage <ArrowRight size={15} />
+                  </Link>
+                  <Link
+                    href="/?auth=editor-create"
+                    id="cta-edit"
+                    className="inline-flex items-center gap-2 rounded-full border border-navy/25 bg-white px-6 py-3 text-sm font-black text-neutral-800 hover:bg-neutral-50 transition"
+                  >
+                    I have the edit <ArrowRight size={15} />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right: step 1 visual only */}
+              <div className="rounded-2xl bg-[#17345c] p-5 text-white shadow-xl">
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white/60 mb-3">
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 text-[10px] font-black text-white">1</span>
+                  A brand shares one long video
+                </div>
+                <Image
+                  src="/how_step1_video.webp"
+                  alt="Brand shares a long video with highlight segments"
+                  width={520}
+                  height={200}
+                  className="w-full rounded-xl object-cover"
+                  priority
+                />
+                <p className="text-[10px] text-white/40 mt-2">Podcast episode, 58 min · The white parts are the best moments.</p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* CAMPAIGN SHOWCASE & CARD VIEW (FEATURED BANNER + FILTER + CARDS) */}
-        <section className="container py-10 md:py-14 space-y-8">
-          {/* Top Featured Hero Banner (Inspired by user reference layout) */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1626] via-[#17345c] to-[#0d213a] p-6 sm:p-8 text-white shadow-xl border border-white/10">
-            <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-              <div className="space-y-3 max-w-xl">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/90 backdrop-blur">
-                  <div className="h-5 w-5 rounded-full bg-emerald-500 text-[10px] font-black text-white grid place-items-center">CF</div>
-                  <span>Featured Campaign</span>
-                  <span className="text-amber-400">✓</span>
-                </div>
-
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                  Topps x Clipfarm • Viral Challenge
-                </h2>
-
-                <div className="flex flex-wrap items-center gap-3 text-xs text-white/80">
-                  <span className="rounded-md bg-white/10 px-2 py-0.5 font-bold">Campaign</span>
-                  <span>•</span>
-                  <span className="font-semibold text-emerald-300">811k views verified</span>
-                  <span>•</span>
-                  <span className="font-black text-white">₹85,000 editor pool</span>
-                </div>
+        {/* ══════════════════════════════════════════════════
+            OPEN CAMPAIGNS
+        ══════════════════════════════════════════════════ */}
+        <section className="bg-surface py-16 md:py-20">
+          <div className="container">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.2em] text-navy mb-1">Live now</p>
+                <h2 className="text-3xl font-black tracking-[-0.05em] text-neutral-900">Open campaigns</h2>
+                <p className="text-sm text-neutral-500 mt-1">Apply, edit, post, and earn from real&nbsp;views.</p>
               </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <Link
-                  href="/editor/campaigns"
-                  className="rounded-full bg-white px-6 py-3 text-xs font-black text-navy shadow-lg hover:bg-neutral-100 text-center transition"
-                >
-                  View campaign
-                </Link>
-              </div>
+              <Link href="/?auth=editor-create" className="text-xs font-bold text-navy hover:underline flex items-center gap-1">
+                Browse all <ArrowRight size={12} />
+              </Link>
             </div>
-
-            {/* Subtle background glow effect */}
-            <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-500/15 blur-3xl" />
-            <div className="pointer-events-none absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-navy/40 blur-3xl" />
-          </div>
-
-          {/* Section Header: Campaigns for you > */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-4">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-navy">
-                <Flame size={15} /> Open Opportunities
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-[-0.05em] text-neutral-900 mt-1 flex items-center gap-2">
-                <span>Campaigns for you</span>
-                <span className="text-neutral-400 text-xl font-normal">&gt;</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-neutral-500">
-                Instagram and YouTube briefs with slot-based pools and verified view rewards.
-              </p>
-            </div>
-
-            {/* Search Input */}
-            <div className="relative w-full sm:w-72">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Search campaigns..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-navy/15 bg-white py-2 pl-10 pr-4 text-xs font-medium outline-none focus:border-navy shadow-sm"
-              />
-            </div>
-          </div>
-
-          {/* Filter Pills (Category & Strictly Instagram/YouTube Platform) */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-y border-navy/10 py-3.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 mr-1">Category:</span>
-              {["ALL", "Tech", "Fashion", "Fitness", "Gaming", "Food"].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`rounded-full px-3.5 py-1 text-xs font-bold transition ${
-                    selectedCategory.toUpperCase() === cat.toUpperCase()
-                      ? "bg-navy text-white shadow-sm"
-                      : "bg-white text-neutral-600 hover:bg-neutral-100"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 mr-1">Platform:</span>
-              {["ALL", "Instagram", "YouTube"].map((plat) => (
-                <button
-                  key={plat}
-                  onClick={() => setSelectedPlatform(plat)}
-                  className={`rounded-full px-3.5 py-1 text-xs font-bold transition ${
-                    selectedPlatform.toUpperCase() === plat.toUpperCase()
-                      ? "bg-navy text-white shadow-sm"
-                      : "bg-surface text-neutral-600 hover:bg-neutral-200"
-                  }`}
-                >
-                  {plat === "Instagram" ? "📸 Instagram" : plat === "YouTube" ? "▶ YouTube" : "All Platforms"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* CAMPAIGN CARD GRID */}
-          {filteredCampaigns.length === 0 ? (
-            <div className="rounded-3xl border border-navy/10 bg-white p-12 text-center text-neutral-500">
-              No campaigns match your filter. Try selecting All or clearing search.
-            </div>
-          ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredCampaigns.map((camp) => (
+              {campaigns.map((camp) => (
                 <CampaignCard key={camp.id} campaign={camp} />
               ))}
             </div>
-          )}
+          </div>
         </section>
 
-        {/* FINANCIAL TRANSPARENCY SECTION */}
-        <section className="container py-16 md:py-20">
-          <div className="grid gap-12 md:grid-cols-2 md:items-center">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[.2em] text-navy">Financial Model</p>
-              <h2 className="mt-4 text-4xl font-black tracking-[-0.06em] md:text-5xl">
-                Gross reward transparency with automatic ledger entries.
-              </h2>
-              <p className="mt-5 max-w-lg leading-7 text-neutral-500">
-                The campaign reward set by the creator is the gross amount. Upon verification and reward approval, the system allocates 85% directly to the editor&apos;s virtual wallet and 15% to the platform ledger.
-              </p>
-              <ul className="mt-8 space-y-4 text-sm font-semibold">
-                {["Configurable 15% default platform fee", "Integer-based minor units (paise) preventing float drift", "Ledger-backed virtual wallet balances", "Instant balance updates upon post verification"].map((item) => (
-                  <li key={item}><Check className="mr-3 inline text-navy" size={18} />{item}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-[2rem] bg-gradient-to-br from-navy-soft via-white to-navy/10 p-8">
-              <div className="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-navy/10">
-                <div className="flex justify-between text-sm">
-                  <span className="font-semibold text-neutral-600">Sample Campaign</span>
-                  <span className="font-bold text-emerald-600">Reward Breakdown</span>
-                </div>
-                <p className="mt-6 text-4xl font-black tracking-[-0.06em] text-navy">₹1,000</p>
-                <p className="text-xs text-neutral-400 mt-1">100,000 paise gross reward</p>
-                <div className="mt-8 space-y-3">
-                  <div className="flex items-center justify-between rounded-xl bg-navy-soft/60 px-4 py-3 text-sm">
-                    <span className="font-medium text-neutral-700">Editor Wallet (+85%)</span>
-                    <span className="font-bold text-emerald-600">₹850</span>
+        {/* ══════════════════════════════════════════════════
+            HOW IT WORKS — 3 visual cards with images
+        ══════════════════════════════════════════════════ */}
+        <section className="bg-surface py-16 md:py-20">
+          <div className="container">
+            <p className="text-center text-xs font-black uppercase tracking-[.2em] text-navy mb-2">How it works</p>
+            <h2 className="text-center text-3xl md:text-4xl font-black tracking-[-0.05em] mb-12">
+              Three simple steps.
+            </h2>
+            <div className="grid gap-6 md:grid-cols-3">
+              {/* Step 1 — with video image */}
+              <div className="rounded-2xl border border-navy/10 bg-white shadow-sm flex flex-col overflow-hidden">
+                <div className="p-6 flex-1">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-navy text-white">
+                      <Play size={20} />
+                    </span>
+                    <span className="text-4xl font-black text-neutral-100 leading-none">01</span>
                   </div>
-                  <div className="flex items-center justify-between rounded-xl bg-navy-soft/40 px-4 py-3 text-sm">
-                    <span className="font-medium text-neutral-700">Platform Ledger (+15%)</span>
-                    <span className="font-semibold text-neutral-600">₹150</span>
-                  </div>
+                  <h3 className="text-lg font-black tracking-[-0.03em] text-neutral-900 mb-2">Brand posts footage</h3>
+                  <p className="text-sm leading-6 text-neutral-500">
+                    Upload your long podcast, event recording, or product video. Set your per-view rate and total budget.
+                  </p>
                 </div>
+                <Image
+                  src="/how_step1_video.webp"
+                  alt="Long video timeline with highlighted best moments"
+                  width={520}
+                  height={200}
+                  className="w-full object-cover"
+                />
+              </div>
+
+              {/* Step 2 — with clips image */}
+              <div className="rounded-2xl border border-navy/10 bg-white shadow-sm flex flex-col overflow-hidden">
+                <div className="p-6 flex-1">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-navy text-white">
+                      <Scissors size={20} />
+                    </span>
+                    <span className="text-4xl font-black text-neutral-100 leading-none">02</span>
+                  </div>
+                  <h3 className="text-lg font-black tracking-[-0.03em] text-neutral-900 mb-2">Editors create short clips</h3>
+                  <p className="text-sm leading-6 text-neutral-500">
+                    Skilled editors apply, cut the best moments, and publish them across Instagram &amp; YouTube.
+                  </p>
+                </div>
+                <Image
+                  src="/how_step2_clips.webp"
+                  alt="Three video clips with view counts and earnings"
+                  width={520}
+                  height={180}
+                  className="w-full object-cover"
+                />
+              </div>
+
+              {/* Step 3 — with payout image */}
+              <div className="rounded-2xl border border-navy/10 bg-white shadow-sm flex flex-col overflow-hidden">
+                <div className="p-6 flex-1">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-navy text-white">
+                      <IndianRupee size={20} />
+                    </span>
+                    <span className="text-4xl font-black text-neutral-100 leading-none">03</span>
+                  </div>
+                  <h3 className="text-lg font-black tracking-[-0.03em] text-neutral-900 mb-2">Pay only for real views</h3>
+                  <p className="text-sm leading-6 text-neutral-500">
+                    Views are verified. Editors earn 85% of the payout. You pay nothing for clips that don&apos;t perform.
+                  </p>
+                </div>
+                <Image
+                  src="/how_step3_payout.webp"
+                  alt="Budget progress bar showing paid out views"
+                  width={520}
+                  height={140}
+                  className="w-full object-cover"
+                />
               </div>
             </div>
           </div>
         </section>
 
-        {/* FAQs */}
-        <section className="container pb-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-[.2em] text-neutral-400">Questions</p>
-            <h2 className="mt-4 text-4xl font-black tracking-[-0.06em]">Frequently asked questions.</h2>
-            <div className="mt-8 space-y-3 text-left">
-              {faqs.map((faq, index) => (
-                <details key={faq} open={index === 0} className="rounded-2xl border border-navy/10 bg-white p-5">
-                  <summary className="cursor-pointer font-bold text-navy">{faq}</summary>
-                  <p className="mt-3 text-sm leading-6 text-neutral-500">
-                    CreatorFlow provides an intuitive end-to-end workflow: Campaign draft → Publish → Editor application → Submission review → Social publish → URL verification → Reward release with 15% platform fee deduction.
-                  </p>
-                </details>
+        {/* ══════════════════════════════════════════════════
+            TRANSPARENT MATH
+        ══════════════════════════════════════════════════ */}
+        <section className="bg-white py-20 md:py-24">
+          <div className="container">
+            <div className="grid gap-12 md:grid-cols-2 md:items-center">
+              {/* Left */}
+              <div>
+                <p className="text-sm font-black uppercase tracking-[.2em] text-navy mb-4">The math, made simple</p>
+                <h2 className="text-4xl md:text-5xl font-black tracking-[-0.06em] leading-[0.95] mb-6">
+                  No hidden cut.<br />Here is the whole math.
+                </h2>
+                <p className="text-base leading-7 text-neutral-500 max-w-md">
+                  Editors keep <strong className="text-neutral-800">85%</strong> of every payout.
+                  Reviral keeps <strong className="text-neutral-800">15%</strong>. You can see the split on
+                  every single payment.
+                </p>
+                <ul className="mt-8 space-y-3 text-sm font-semibold text-neutral-700">
+                  {[
+                    "No monthly fees — pay only for verified views",
+                    "Paise-precise ledger, no float drift",
+                    "Instant wallet update after post verification",
+                    "Full transaction history for every campaign",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <span className="mt-0.5 h-5 w-5 shrink-0 grid place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                        <Eye size={11} />
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Right: payout card */}
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-dashed border-navy/25 bg-white p-7 shadow-sm">
+                  <div className="flex items-center gap-2 mb-6">
+                    <span className="grid h-7 w-7 place-items-center rounded-lg border border-navy/15 text-navy">
+                      <IndianRupee size={14} />
+                    </span>
+                    <span className="text-xs font-black uppercase tracking-wider text-neutral-400">Example payout</span>
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-500">7,500 verified views at ₹200 per 1,000</span>
+                      <span className="font-bold text-neutral-900">₹1,500</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-500">Reviral fee (15%)</span>
+                      <span className="font-bold text-neutral-500">₹225</span>
+                    </div>
+                    <div className="h-px bg-neutral-200 my-2" />
+                    <div className="flex items-center justify-between">
+                      <span className="font-black text-neutral-900 text-base">Editor receives</span>
+                      <span className="font-black text-2xl text-navy">₹1,275</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dual CTA cards */}
+            <div className="mt-14 grid gap-5 md:grid-cols-2">
+              <div className="rounded-2xl bg-navy p-8 text-white">
+                <p className="text-[10px] font-black uppercase tracking-[.2em] text-white/50 mb-4">For brands and podcasters</p>
+                <h3 className="text-2xl font-black tracking-[-0.04em] mb-3">
+                  Pay only for views that actually happen.
+                </h3>
+                <p className="text-sm leading-6 text-white/60 mb-8">
+                  Put your long content in front of hundreds of editors. If a clip gets no views, it costs you nothing.
+                </p>
+                <Link
+                  href="/?auth=creator-create"
+                  id="cta-brand-campaign"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition"
+                >
+                  Start a campaign <ArrowRight size={14} />
+                </Link>
+              </div>
+              <div className="rounded-2xl border border-navy/15 bg-white p-8">
+                <p className="text-[10px] font-black uppercase tracking-[.2em] text-navy/50 mb-4">For editors</p>
+                <h3 className="text-2xl font-black tracking-[-0.04em] text-neutral-900 mb-3">
+                  Turn your editing skill into steady income.
+                </h3>
+                <p className="text-sm leading-6 text-neutral-500 mb-8">
+                  Pick a campaign in your niche, cut, post, and watch earnings build with every view.
+                </p>
+                <Link
+                  href="/?auth=editor-create"
+                  id="cta-editor-earn"
+                  className="inline-flex items-center gap-2 rounded-full border border-navy/25 bg-white px-5 py-2.5 text-sm font-bold text-navy hover:bg-navy-soft transition"
+                >
+                  Start earning <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════
+            FAQ
+        ══════════════════════════════════════════════════ */}
+        <section className="bg-white py-20 md:py-24">
+          <div className="container max-w-2xl mx-auto">
+            <p className="text-center text-xs font-black uppercase tracking-[.2em] text-neutral-400 mb-2">Questions</p>
+            <h2 className="text-center text-4xl font-black tracking-[-0.06em] mb-10">
+              Frequently asked questions.
+            </h2>
+            <div className="space-y-3">
+              {faqs.map((faq, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-navy/10 bg-white overflow-hidden"
+                >
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between px-5 py-4 text-left font-bold text-navy text-sm hover:bg-neutral-50 transition"
+                  >
+                    {faq.q}
+                    <span className={`ml-4 shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-45" : ""}`}>
+                      <ArrowRight size={14} />
+                    </span>
+                  </button>
+                  {openFaq === i && (
+                    <p className="px-5 pb-5 text-sm leading-6 text-neutral-500">{faq.a}</p>
+                  )}
+                </div>
               ))}
             </div>
           </div>
         </section>
+
       </main>
 
-      {/* Auth Modal */}
+      {/* ══════════════════════════════════════════════════
+          AUTH MODAL
+      ══════════════════════════════════════════════════ */}
       {authOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl ring-1 ring-navy/10">
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[.2em] text-navy">CreatorFlow access</p>
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-navy">Reviral access</p>
                 <h3 className="mt-2 text-2xl font-black tracking-[-0.05em]">
-                  {authFlow === "admin" ? "Admin" : authFlow === "editor" ? "Editor" : "Creator"} {authMode === "create" ? "account" : "login"}
+                  {authFlow === "admin" ? "Admin" : authFlow === "editor" ? "Editor" : "Brand"}{" "}
+                  {authMode === "create" ? "account" : "login"}
                 </h3>
               </div>
               <button onClick={() => setAuthOpen(false)} className="rounded-full bg-navy-soft p-2 text-navy">
@@ -446,20 +533,24 @@ function HomeContent() {
               </button>
             </div>
 
-            <div className="mb-5 flex rounded-full bg-navy-soft p-1 text-sm font-semibold text-neutral-700">
-              <button
-                className={`flex-1 rounded-full px-3 py-2 ${authMode === "create" ? "bg-white text-navy shadow" : ""}`}
-                onClick={() => { setAuthMode("create"); setAuthNotice(""); }}
-              >
-                Create account
-              </button>
-              <button
-                className={`flex-1 rounded-full px-3 py-2 ${authMode === "login" ? "bg-white text-navy shadow" : ""}`}
-                onClick={() => { setAuthMode("login"); setAuthNotice(""); }}
-              >
-                Login
-              </button>
-            </div>
+            {authFlow !== "admin" && (
+              <div className="mb-5 flex rounded-full bg-navy-soft p-1 text-sm font-semibold text-neutral-700">
+                <button
+                  className={`flex-1 rounded-full px-3 py-2 ${authMode === "create" ? "bg-white text-navy shadow" : ""}`}
+                  onClick={() => { setAuthMode("create"); setAuthNotice(""); }}
+                >
+                  Create account
+                </button>
+                <button
+                  className={`flex-1 rounded-full px-3 py-2 ${authMode === "login" ? "bg-white text-navy shadow" : ""}`}
+                  onClick={() => { setAuthMode("login"); setAuthNotice(""); }}
+                >
+                  Login
+                </button>
+              </div>
+            )}
+
+
 
             {authNotice && (
               <p className="mb-4 rounded-2xl bg-navy-soft px-4 py-3 text-sm font-semibold text-navy">
@@ -516,7 +607,7 @@ function HomeContent() {
 
               <button className="w-full rounded-2xl bg-navy px-4 py-3 font-bold text-white shadow-navy">
                 {authMode === "create" ? "Join as " : "Sign in as "}
-                {authFlow === "admin" ? "Admin" : authFlow === "editor" ? "Editor" : "Creator"}
+                {authFlow === "admin" ? "Admin" : authFlow === "editor" ? "Editor" : "Brand"}
               </button>
             </form>
           </div>

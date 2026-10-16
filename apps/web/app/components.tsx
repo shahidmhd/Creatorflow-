@@ -7,7 +7,7 @@ import { Moon, Sun, Menu, X, ArrowRight, Sparkles } from "lucide-react";
 export function ThemeToggle() {
   const [dark, setDark] = useState(false);
   useEffect(() => {
-    const stored = localStorage.getItem("creatorflow-theme");
+    const stored = localStorage.getItem("reviral-theme") || localStorage.getItem("creatorflow-theme");
     const next = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
@@ -15,16 +15,18 @@ export function ThemeToggle() {
   function toggle() {
     const next = !dark; setDark(next);
     document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("creatorflow-theme", next ? "dark" : "light");
+    const themeVal = next ? "dark" : "light";
+    localStorage.setItem("reviral-theme", themeVal);
+    localStorage.setItem("creatorflow-theme", themeVal);
   }
   return <button onClick={toggle} aria-label="Toggle dark mode" className="icon-button">{dark ? <Sun size={17}/> : <Moon size={17}/>}</button>;
 }
 
 export function LogoBrand({ href = "/" }: { href?: string }) {
   return (
-    <Link href={href} aria-label="CreatorFlow home" className="flex items-center gap-2.5 text-left">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy text-sm font-black text-white">CF</span>
-      <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">CREATORFLOW</span>
+    <Link href={href} aria-label="Reviral home" className="flex items-center gap-2.5 text-left">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy text-sm font-black text-white">Re</span>
+      <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">REVIRAL</span>
     </Link>
   );
 }
@@ -59,10 +61,10 @@ export function Footer() {
   return <footer className="border-t border-navy/10 bg-white">
     <div className="container flex flex-col gap-5 py-10 text-sm text-neutral-600 md:flex-row md:items-center md:justify-between">
       <LogoBrand />
-      <span>© 2026 CreatorFlow. All rights reserved.</span>
+      <span>© 2026 Reviral. All rights reserved.</span>
       <div className="flex flex-wrap gap-5">
-        <Link href="/?auth=creator-login">Creator sign in</Link>
-        <Link href="/?auth=creator-create">Create Creator account</Link>
+        <Link href="/?auth=creator-login">Brand sign in</Link>
+        <Link href="/?auth=creator-create">Start a campaign</Link>
         <Link href="/?auth=editor-create">Editor sign in / Join</Link>
         <Link href="/?auth=admin-login" className="text-neutral-400 hover:text-navy">Admin Portal</Link>
       </div>

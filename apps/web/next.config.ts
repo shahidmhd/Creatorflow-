@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
       { source: "/onboarding", destination: "/?auth=brand-create", permanent: false },
     ];
   },
+  async rewrites() {
+    return [
+      { source: "/brand", destination: "/creator" },
+      { source: "/brand/:path*", destination: "/creator/:path*" },
+    ];
+  },
 };
 
 export default nextConfig;

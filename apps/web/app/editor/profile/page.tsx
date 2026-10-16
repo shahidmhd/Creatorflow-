@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, ExternalLink, Link as LinkIcon, Plus, Trash2, Video } from "lucide-react";
-import { api } from "@/app/api";
+import { api, getAuthSession } from "@/app/api";
 
 export default function EditorProfilePage() {
   const [saved, setSaved] = useState(false);
@@ -61,9 +61,8 @@ export default function EditorProfilePage() {
         }
       })
       .catch(() => {
-        const raw = localStorage.getItem("creatorflow-session");
-        if (raw) {
-          const s = JSON.parse(raw);
+        const s = getAuthSession();
+        if (s) {
           setForm((prev) => ({
             ...prev,
             name: s.name || s.username || "Editor",

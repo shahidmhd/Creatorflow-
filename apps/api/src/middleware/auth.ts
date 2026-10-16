@@ -28,9 +28,13 @@ export async function authenticate(
 
     const token = authHeader.slice(7);
 
-    // 1. Support local development tokens (e.g. creatorflow_token_<userId>)
-    if (token.startsWith("creatorflow_token_") || token.startsWith("mock_jwt_token_")) {
-      const rawId = token.replace("creatorflow_token_", "").replace("mock_jwt_token_", "").trim();
+    // 1. Support local development tokens (e.g. creatorflow_token_<userId> or reviral_token_<userId>)
+    if (token.startsWith("creatorflow_token_") || token.startsWith("reviral_token_") || token.startsWith("mock_jwt_token_")) {
+      const rawId = token
+        .replace("creatorflow_token_", "")
+        .replace("reviral_token_", "")
+        .replace("mock_jwt_token_", "")
+        .trim();
       const user = await prisma.user.findFirst({
         where: {
           OR: [

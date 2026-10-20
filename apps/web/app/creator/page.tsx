@@ -45,71 +45,52 @@ interface SubmissionItem {
   notes?: string;
   feedback?: string;
   status: "DRAFT" | "SUBMITTED" | "CHANGES_REQUESTED" | "APPROVED" | "REJECTED";
-  editor: {
+  editor?: {
+    id?: string;
     name: string;
     username: string;
+    avatarUrl?: string;
   };
   campaignId: string;
+  campaign?: {
+    id: string;
+    title: string;
+    rewardAmount?: number;
+    editorRewardPool?: number;
+    earningPer1000Views?: number;
+    socialPlatform?: string;
+  };
   campaignTitle?: string;
-  rawViews?: number;
-  payableViews?: number;
-  estimatedReward?: number;
+  publishedPost?: {
+    id: string;
+    verifiedViews: number;
+    postUrl: string;
+  };
+  submittedAt?: string;
+  createdAt?: string;
 }
 
 interface DashboardStats {
   activeCampaigns: number;
   totalPoolRemaining: number;
+  walletBalance?: number;
   totalViewsDelivered: number;
   totalSpentThisMonth: number;
   totalApplications: number;
   submissionsToReview: number;
 }
 
-const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
-  {
-    id: "sub-sample-1",
-    editorId: "ed-1",
-    contentUrl: "https://instagram.com/reel/sample1",
-    caption: "3 productivity hacks that 10x your output every week.",
-    status: "SUBMITTED",
-    editor: {
-      name: "Rahul K.",
-      username: "rahulk",
-    },
-    campaignId: "c-1",
-    campaignTitle: "Spring Creator Launch",
-    rawViews: 9800,
-    payableViews: 7200,
-    estimatedReward: 864,
-  },
-  {
-    id: "sub-sample-2",
-    editorId: "ed-2",
-    contentUrl: "https://instagram.com/reel/sample2",
-    caption: "The secret founder playbook nobody talks about.",
-    status: "SUBMITTED",
-    editor: {
-      name: "Aman V.",
-      username: "amanv",
-    },
-    campaignId: "c-2",
-    campaignTitle: "Summer Viral Challenge",
-    rawViews: 14500,
-    payableViews: 12000,
-    estimatedReward: 1440,
-  },
-];
-
 export default function CreatorOverviewPage() {
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
-  const [submissions, setSubmissions] = useState<SubmissionItem[]>(DEFAULT_SUBMISSIONS);
+  const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
-    activeCampaigns: 1,
-    totalPoolRemaining: 53500,
-    totalViewsDelivered: 59800,
-    totalSpentThisMonth: 6384,
-    totalApplications: 12,
-    submissionsToReview: 2,
+    activeCampaigns: 0,
+    totalPoolRemaining: 0,
+    walletBalance: 0,
+    totalViewsDelivered: 0,
+    totalSpentThisMonth: 0,
+    totalApplications: 0,
+    submissionsToReview: 0,
   });
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -125,68 +106,48 @@ export default function CreatorOverviewPage() {
     setLoading(true);
     setError("");
     try {
-      // 1. Fetch creator's campaigns and wallet balance
-      const [camps, walletData] = await Promise.all([
-        api<CampaignItem[]>("/campaigns/mine?limit=20").catch(() => [] as CampaignItem[]),
-        api<{ balance: number }>("/wallet").catch(() => null),
-      ]);
-      const campaignList = Array.isArray(camps) ? camps : [];
-      setCampaigns(campaignList);
+      // 1. Fetch real aggregate overview from backend
+      const res = await api<{
+        stats: DashboardStats;
+        pendingSubmissions: SubmissionItem[];
+        recentCampaigns: CampaignItem[];
+      }>("/campaigns/creator/overview").catch(async () => {
+        // Fallback to individual endpoints if aggregated overview is unreachable
+        const [camps, walletData] = await Promise.all([
+          api<CampaignItem[]>("/campaigns/mine?limit=20").catch(() => [] as CampaignItem[]),
+          api<{ balance: number }>("/wallet").catch(() => null),
+        ]);
+        const campaignList = Array.isArray(camps) ? camps : [];
+        const activeCount = campaignList.filter((c) => c.status === "PUBLISHED").length;
+        const totalApps = campaignList.reduce((sum, c) => sum + (c._count?.applications ?? 0), 0);
+        const activePool =
+          campaignList
+            .filter((c) => c.status === "PUBLISHED")
+            .reduce((sum, c) => sum + (c.editorRewardPool || c.campaignFund || c.rewardAmount || 0), 0) / 100;
+        const walletBalMajor = walletData?.balance ? Math.round(walletData.balance / 100) : 0;
 
-      // Compute counts
-      const activeCount = campaignList.filter((c) => c.status === "PUBLISHED").length;
-      const totalApps = campaignList.reduce((sum, c) => sum + (c._count?.applications ?? 0), 0);
-      const computedPool = campaignList.reduce(
-        (sum, c) => sum + (c.editorRewardPool || c.campaignFund || c.rewardAmount || 0),
-        0
-      ) / 100;
-
-      const walletBalMajor = walletData?.balance ? Math.round(walletData.balance / 100) : 0;
-
-      // 2. Fetch submissions for published/active campaigns
-      const activeCamps = campaignList
-        .filter((c) => ["PUBLISHED", "PAUSED"].includes(c.status))
-        .slice(0, 5);
-
-      const subResults = await Promise.all(
-        activeCamps.map((c) =>
-          api<SubmissionItem[]>(`/submissions/campaign/${c.id}`)
-            .then((subs) =>
-              (Array.isArray(subs) ? subs : []).map((s) => ({
-                ...s,
-                campaignId: c.id,
-                campaignTitle: c.title,
-                rawViews: 9800,
-                payableViews: 7200,
-                estimatedReward: 864,
-              }))
-            )
-            .catch(() => [] as SubmissionItem[])
-        )
-      );
-
-      const allSubs = subResults.flat();
-      allSubs.sort((a, b) => {
-        if (a.status === "SUBMITTED" && b.status !== "SUBMITTED") return -1;
-        if (b.status === "SUBMITTED" && a.status !== "SUBMITTED") return 1;
-        return 0;
+        return {
+          stats: {
+            activeCampaigns: activeCount,
+            totalPoolRemaining: Math.round(activePool),
+            walletBalance: walletBalMajor,
+            totalViewsDelivered: 0,
+            totalSpentThisMonth: 0,
+            totalApplications: totalApps,
+            submissionsToReview: 0,
+          },
+          pendingSubmissions: [] as SubmissionItem[],
+          recentCampaigns: campaignList.slice(0, 5),
+        };
       });
 
-      const displaySubs = allSubs.length > 0 ? allSubs : DEFAULT_SUBMISSIONS;
-      setSubmissions(displaySubs);
-
-      const pendingSubs = displaySubs.filter((s) => s.status === "SUBMITTED").length;
-
-      setStats({
-        activeCampaigns: activeCount > 0 ? activeCount : 0,
-        totalPoolRemaining: walletBalMajor > 0 ? walletBalMajor : (computedPool > 0 ? computedPool : 0),
-        totalViewsDelivered: 59800,
-        totalSpentThisMonth: 6384,
-        totalApplications: totalApps > 0 ? totalApps : 0,
-        submissionsToReview: pendingSubs > 0 ? pendingSubs : 0,
-      });
-    } catch {
-      setError("Failed to load dashboard data. Showing saved overview.");
+      if (res?.stats) {
+        setStats(res.stats);
+      }
+      setSubmissions(res?.pendingSubmissions || []);
+      setCampaigns(res?.recentCampaigns || []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load dashboard data.");
     } finally {
       setLoading(false);
     }
@@ -200,12 +161,8 @@ export default function CreatorOverviewPage() {
     if (busyId) return;
     setBusyId(subId);
     try {
-      if (!subId.startsWith("sub-sample-")) {
-        await api(`/submissions/${subId}/approve`, { method: "POST" });
-      }
-      setSubmissions((prev) =>
-        prev.map((s) => (s.id === subId ? { ...s, status: "APPROVED" } : s))
-      );
+      await api(`/submissions/${subId}/approve`, { method: "POST" });
+      setSubmissions((prev) => prev.filter((s) => s.id !== subId));
       setStats((prev) => ({
         ...prev,
         submissionsToReview: Math.max(0, prev.submissionsToReview - 1),
@@ -225,22 +182,18 @@ export default function CreatorOverviewPage() {
 
     setBusyId(subId);
     try {
-      if (!subId.startsWith("sub-sample-")) {
-        await api(`/submissions/${subId}/request-changes`, {
-          method: "POST",
-          body: JSON.stringify({ feedback: reason || "Rejected by brand" }),
-        });
-      }
-      setSubmissions((prev) =>
-        prev.map((s) => (s.id === subId ? { ...s, status: "REJECTED", feedback: reason || "Rejected" } : s))
-      );
+      await api(`/submissions/${subId}/request-changes`, {
+        method: "POST",
+        body: JSON.stringify({ feedback: reason || "Changes requested by brand" }),
+      });
+      setSubmissions((prev) => prev.filter((s) => s.id !== subId));
       setStats((prev) => ({
         ...prev,
         submissionsToReview: Math.max(0, prev.submissionsToReview - 1),
       }));
-      showNotice("Submission marked as rejected.");
+      showNotice("Feedback sent to editor. Submission marked for revision.");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to reject submission.");
+      setError(err instanceof Error ? err.message : "Failed to update submission.");
     } finally {
       setBusyId(null);
     }
@@ -256,7 +209,7 @@ export default function CreatorOverviewPage() {
     {
       title: "Total Pool Remaining",
       value: `₹${stats.totalPoolRemaining.toLocaleString("en-IN")}`,
-      subtitle: "Across all campaigns",
+      subtitle: "Across active campaigns",
       Icon: IndianRupee,
     },
     {
@@ -285,9 +238,6 @@ export default function CreatorOverviewPage() {
     },
   ];
 
-  const pendingReviewSubs = submissions.filter((s) => s.status === "SUBMITTED");
-  const recentCampaigns = campaigns.slice(0, 5);
-
   return (
     <div className="space-y-7">
       {/* Top Header */}
@@ -297,7 +247,7 @@ export default function CreatorOverviewPage() {
             Brand Overview
           </h1>
           <p className="text-xs text-neutral-400 mt-0.5">
-            Monitor active campaigns, view metrics, and review submissions.
+            Monitor active campaigns, view real-time metrics, and review submissions.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -334,7 +284,7 @@ export default function CreatorOverviewPage() {
           STAT CARDS: 2 COLUMNS IN A ROW (Reviral Navy Theme)
       ══════════════════════════════════════════════════ */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-16">
           <Loader2 className="h-7 w-7 animate-spin text-navy" />
         </div>
       ) : (
@@ -371,71 +321,119 @@ export default function CreatorOverviewPage() {
                   Recent submissions awaiting review
                 </h2>
                 <p className="text-xs font-medium text-neutral-400 mt-0.5">
-                  Review clips from across your campaigns.
+                  Review and approve clips from across your active campaigns.
                 </p>
               </div>
               <Link
                 href="/creator/campaigns"
                 className="text-xs font-bold text-navy hover:underline"
               >
-                View campaigns
+                View all campaigns
               </Link>
             </div>
 
-            {pendingReviewSubs.length === 0 ? (
-              <div className="py-8 text-center text-xs text-neutral-400">
-                No submissions currently awaiting review.
+            {submissions.length === 0 ? (
+              <div className="py-12 text-center">
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-navy-soft text-navy mb-3">
+                  <Sparkles size={20} />
+                </div>
+                <p className="text-sm font-bold text-neutral-800">No submissions awaiting review</p>
+                <p className="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
+                  When approved editors upload video clips for your campaigns, they will show up here for you to review and approve.
+                </p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-100">
-                {pendingReviewSubs.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-neutral-900">
-                          {sub.editor?.name || "Rahul K."}
-                        </span>
-                        <span className="text-neutral-300 font-bold">·</span>
-                        <span className="text-sm font-medium text-neutral-500">
-                          {sub.campaignTitle || "Spring Creator Launch"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-neutral-500 mt-1">
-                        {(sub.rawViews ?? 9800).toLocaleString("en-IN")} raw views ·{" "}
-                        {(sub.payableViews ?? 7200).toLocaleString("en-IN")} payable views · ₹
-                        {(sub.estimatedReward ?? 864).toLocaleString("en-IN")}
-                      </p>
-                      <a
-                        href={sub.contentUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs font-medium text-navy hover:underline mt-1.5 inline-flex items-center gap-1"
-                      >
-                        Open submitted clip <ExternalLink size={11} />
-                      </a>
-                    </div>
+                {submissions.map((sub) => {
+                  const editorName = sub.editor?.name || sub.editor?.username || "Editor";
+                  const campaignTitle = sub.campaign?.title || sub.campaignTitle || "Campaign";
+                  const ratePerK = sub.campaign?.earningPer1000Views
+                    ? Math.round(sub.campaign.earningPer1000Views / 100)
+                    : null;
+                  const verifiedViews = sub.publishedPost?.verifiedViews;
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={() => handleApproveSub(sub.id)}
-                        disabled={busyId === sub.id}
-                        className="rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white transition shadow-sm disabled:opacity-50"
-                      >
-                        {busyId === sub.id ? "Approving…" : "Approve"}
-                      </button>
-                      <button
-                        onClick={() => handleRejectSub(sub.id)}
-                        disabled={busyId === sub.id}
-                        className="rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 px-3 py-2 transition disabled:opacity-50"
-                      >
-                        Reject
-                      </button>
+                  return (
+                    <div
+                      key={sub.id}
+                      className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-sm text-neutral-900">
+                            {editorName}
+                          </span>
+                          <span className="text-neutral-300 font-bold">·</span>
+                          <span className="text-sm font-medium text-neutral-600 truncate">
+                            {campaignTitle}
+                          </span>
+                        </div>
+
+                        {sub.caption && (
+                          <p className="text-xs text-neutral-600 italic mt-1 line-clamp-1">
+                            &ldquo;{sub.caption}&rdquo;
+                          </p>
+                        )}
+
+                        <p className="text-xs text-neutral-400 mt-1 flex items-center gap-2 flex-wrap">
+                          {verifiedViews !== undefined ? (
+                            <span className="font-semibold text-emerald-600">
+                              {verifiedViews.toLocaleString("en-IN")} verified views
+                            </span>
+                          ) : (
+                            <span className="font-semibold text-amber-600">
+                              Awaiting brand approval
+                            </span>
+                          )}
+                          {ratePerK && (
+                            <>
+                              <span>·</span>
+                              <span>₹{ratePerK} / 1k views</span>
+                            </>
+                          )}
+                          {sub.submittedAt && (
+                            <>
+                              <span>·</span>
+                              <span>
+                                {new Date(sub.submittedAt).toLocaleDateString("en-IN", {
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </>
+                          )}
+                        </p>
+
+                        <a
+                          href={sub.contentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs font-semibold text-navy hover:underline mt-2 inline-flex items-center gap-1"
+                        >
+                          Open submitted clip <ExternalLink size={11} />
+                        </a>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handleApproveSub(sub.id)}
+                          disabled={busyId === sub.id}
+                          className="rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white transition disabled:opacity-50"
+                        >
+                          {busyId === sub.id ? "Approving…" : "Approve"}
+                        </button>
+                        <button
+                          onClick={() => handleRejectSub(sub.id)}
+                          disabled={busyId === sub.id}
+                          className="rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 px-3 py-2 transition disabled:opacity-50"
+                        >
+                          Request Changes
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -443,7 +441,23 @@ export default function CreatorOverviewPage() {
           {/* ══════════════════════════════════════════════════
               ACTIVE CAMPAIGNS SECTION
           ══════════════════════════════════════════════════ */}
-          {recentCampaigns.length > 0 && (
+          {campaigns.length === 0 ? (
+            <div className="rounded-2xl border border-navy/10 bg-white p-8 text-center shadow-sm">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-navy-soft text-navy mb-3">
+                <Video size={20} />
+              </div>
+              <h3 className="text-sm font-black text-neutral-900">No campaigns launched yet</h3>
+              <p className="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
+                Create your first performance campaign to invite editors and start generating viral short-form clips.
+              </p>
+              <Link
+                href="/creator/campaigns/new"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-navy px-5 py-2 text-xs font-bold text-white hover:bg-navy/90 transition"
+              >
+                <Plus size={14} /> Create Campaign
+              </Link>
+            </div>
+          ) : (
             <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
               <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-navy/5">
                 <h2 className="text-sm font-black tracking-[-0.02em] text-neutral-900 flex items-center gap-2">
@@ -458,8 +472,8 @@ export default function CreatorOverviewPage() {
               </div>
 
               <div className="divide-y divide-neutral-100">
-                {recentCampaigns.map((c) => {
-                  const gross = Math.round(c.rewardAmount / 100);
+                {campaigns.map((c) => {
+                  const gross = Math.round((c.editorRewardPool || c.campaignFund || c.rewardAmount) / 100);
                   return (
                     <div
                       key={c.id}

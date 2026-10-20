@@ -1,4 +1,4 @@
-import { CampaignStatus, ApplicationStatus } from "@prisma/client";
+import { CampaignStatus, ApplicationStatus, SubmissionStatus } from "@prisma/client";
 import { prisma } from "../repositories/prisma";
 import { NotFoundError, ForbiddenError, ConflictError } from "../errors";
 import { auditLogService } from "./audit-log.service";
@@ -9,8 +9,8 @@ import { walletService } from "./wallet.service";
 const ALLOWED_TRANSITIONS: Record<CampaignStatus, CampaignStatus[]> = {
   DRAFT: [CampaignStatus.PUBLISHED, CampaignStatus.CANCELLED],
   PUBLISHED: [CampaignStatus.PAUSED, CampaignStatus.COMPLETED, CampaignStatus.CANCELLED],
-  PAUSED: [CampaignStatus.PUBLISHED, CampaignStatus.CANCELLED],
-  COMPLETED: [],
+  PAUSED: [CampaignStatus.PUBLISHED, CampaignStatus.COMPLETED, CampaignStatus.CANCELLED],
+  COMPLETED: [CampaignStatus.PUBLISHED],
   CANCELLED: [],
 };
 
@@ -239,13 +239,167 @@ export const campaignService = {
 
     const updated = await prisma.campaign.update({ where: { id }, data: { status: toStatus } });
     await auditLogService.log(actorId, `CAMPAIGN_${toStatus}`, "Campaign", id, { status: campaign.status }, { status: toStatus });
+
+    // When campaign is cancelled, automatically refund unspent escrow back to the creator's wallet
+    if (toStatus === CampaignStatus.CANCELLED && (campaign.campaignFund || campaign.rewardAmount)) {
+      try {
+        const totalFund = campaign.campaignFund || campaign.rewardAmount;
+        const creditedRewards = await prisma.reward.aggregate({
+          where: { campaignId: id, status: "CREDITED" },
+          _sum: { grossAmount: true },
+        });
+        const alreadySpent = creditedRewards._sum.grossAmount || 0;
+        const refundAmount = Math.max(0, totalFund - alreadySpent);
+
+        if (refundAmount > 0) {
+          await walletService.addFunds(
+            campaign.creatorId,
+            refundAmount,
+            `Escrow refund for cancelled campaign "${campaign.title}"`
+          );
+        }
+      } catch (refundErr) {
+        console.error("Failed to process escrow refund for cancelled campaign:", refundErr);
+      }
+    }
+
     return updated;
   },
 
   async delete(id: string, creatorId: string) {
     const campaign = await this.findById(id);
     if (campaign.creatorId !== creatorId) throw new ForbiddenError("You do not own this campaign");
-    if (campaign.status !== CampaignStatus.DRAFT) throw new ConflictError("Only DRAFT campaigns can be deleted");
+    if (campaign.status !== CampaignStatus.DRAFT && campaign.status !== CampaignStatus.CANCELLED) {
+      throw new ConflictError("Only DRAFT or CANCELLED campaigns can be deleted");
+    }
+
+    // Clean up applications or submissions if any
+    await prisma.campaignApplication.deleteMany({ where: { campaignId: id } });
     await prisma.campaign.delete({ where: { id } });
+    await auditLogService.log(creatorId, "CAMPAIGN_DELETED", "Campaign", id, campaign, null);
+  },
+
+  async getCreatorOverview(creatorId: string) {
+    const campaigns = await prisma.campaign.findMany({
+      where: { creatorId },
+      include: {
+        _count: {
+          select: {
+            applications: true,
+            submissions: true,
+          },
+        },
+        publishedPosts: {
+          select: {
+            verifiedViews: true,
+          },
+        },
+        rewards: {
+          where: { status: "CREDITED" },
+          select: {
+            grossAmount: true,
+            netAmount: true,
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const wallet = await prisma.wallet.findUnique({
+      where: { userId: creatorId },
+      include: {
+        transactions: true,
+      },
+    });
+
+    const pendingSubmissions = await prisma.contentSubmission.findMany({
+      where: {
+        campaign: { creatorId },
+        status: SubmissionStatus.SUBMITTED,
+      },
+      include: {
+        editor: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        campaign: {
+          select: {
+            id: true,
+            title: true,
+            rewardAmount: true,
+            editorRewardPool: true,
+            earningPer1000Views: true,
+            socialPlatform: true,
+          },
+        },
+        publishedPost: {
+          select: {
+            id: true,
+            verifiedViews: true,
+            postUrl: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    });
+
+    const activeCampaignsCount = campaigns.filter((c) => c.status === CampaignStatus.PUBLISHED).length;
+    const totalApplications = campaigns.reduce((acc, c) => acc + (c._count?.applications ?? 0), 0);
+    const totalViewsDelivered = campaigns.reduce((acc, c) => {
+      return acc + c.publishedPosts.reduce((pAcc, post) => pAcc + (post.verifiedViews || 0), 0);
+    }, 0);
+
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const creditedRewardsThisMonth = campaigns.reduce((acc, c) => {
+      const thisMonth = c.rewards.filter((r) => r.createdAt >= startOfMonth);
+      return acc + thisMonth.reduce((rAcc, r) => rAcc + r.grossAmount, 0);
+    }, 0);
+
+    const walletDebitsThisMonth = (wallet?.transactions || [])
+      .filter((t) => t.amount < 0 && t.createdAt >= startOfMonth)
+      .reduce((acc, t) => acc + Math.abs(t.amount), 0);
+
+    const totalSpentThisMonthMinor = creditedRewardsThisMonth > 0 ? creditedRewardsThisMonth : walletDebitsThisMonth;
+    const totalSpentThisMonth = Math.round(totalSpentThisMonthMinor / 100);
+
+    const activePoolRemainingMinor = campaigns
+      .filter((c) => c.status === CampaignStatus.PUBLISHED)
+      .reduce((acc, c) => acc + (c.editorRewardPool || c.campaignFund || c.rewardAmount || 0), 0);
+
+    const walletBalance = wallet ? Math.round(wallet.balance / 100) : 0;
+    const totalPoolRemaining = activePoolRemainingMinor > 0 ? Math.round(activePoolRemainingMinor / 100) : 0;
+
+    return {
+      stats: {
+        activeCampaigns: activeCampaignsCount,
+        totalPoolRemaining,
+        walletBalance,
+        totalViewsDelivered,
+        totalSpentThisMonth,
+        totalApplications,
+        submissionsToReview: pendingSubmissions.length,
+      },
+      pendingSubmissions,
+      recentCampaigns: campaigns.slice(0, 5).map((c) => ({
+        id: c.id,
+        title: c.title,
+        status: c.status,
+        category: c.category,
+        socialPlatform: c.socialPlatform,
+        campaignFund: c.campaignFund,
+        rewardAmount: c.rewardAmount,
+        editorRewardPool: c.editorRewardPool,
+        deadline: c.deadline,
+        _count: c._count,
+      })),
+    };
   },
 };

@@ -74,7 +74,15 @@ export const submissionService = {
 
     return prisma.contentSubmission.findMany({
       where: { campaignId },
-      include: { editor: { select: { id: true, name: true, username: true, avatarUrl: true } } },
+      include: {
+        editor: { select: { id: true, name: true, username: true, avatarUrl: true } },
+        campaign: { select: { id: true, title: true, rewardAmount: true, editorRewardPool: true, earningPer1000Views: true } },
+        publishedPost: {
+          include: {
+            reward: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   },

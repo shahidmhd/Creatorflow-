@@ -37,6 +37,14 @@ campaignRoutes.get("/mine", authenticate, requireCreator, async (req, res, next)
   } catch (err) { next(err); }
 });
 
+/** GET /api/v1/campaigns/creator/overview — aggregate real dashboard statistics & review queue */
+campaignRoutes.get("/creator/overview", authenticate, requireCreator, async (req, res, next) => {
+  try {
+    const data = await campaignService.getCreatorOverview((req as AuthRequest).user.id);
+    success(res, data);
+  } catch (err) { next(err); }
+});
+
 /** POST /api/v1/campaigns */
 campaignRoutes.post("/", authenticate, requireCreator, validate(createCampaignSchema), async (req, res, next) => {
   try {

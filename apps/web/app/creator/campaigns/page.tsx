@@ -1,27 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState, useCallback } from "react";
 import {
   Plus,
   Search,
-  Filter,
-  Calendar,
-  Users,
-  Video,
-  Sparkles,
-  ExternalLink,
   ChevronRight,
   TrendingUp,
+  Image as ImageIcon,
+  Pause,
+  Play,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { api } from "@/app/api";
-import { StatusBadge, CampaignDummyThumbnail } from "@/app/components";
+import { StatusBadge } from "@/app/components";
 
 interface CampaignItem {
   id: string;
   title: string;
-  description?: string;
-  thumbnail?: string | null;
+  thumbnail: string | null;
   status: string;
   category: string;
   socialPlatform: string;
@@ -41,59 +39,73 @@ export default function CreatorCampaignsListPage() {
   const [filter, setFilter] = useState("ALL");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const fetchCampaigns = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api<CampaignItem[]>("/campaigns/mine");
+      setCampaigns(Array.isArray(data) ? data : []);
+    } catch {
+      setCampaigns([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    api<CampaignItem[]>("/campaigns/mine")
-      .then((data) => setCampaigns(Array.isArray(data) ? data : []))
-      .catch(() => {
-        // Fallback realistic examples if none exist yet
-        setCampaigns([
-          {
-            id: "cmp-1",
-            title: "Summer Viral Reels Challenge",
-            thumbnail: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&auto=format&fit=crop&q=80",
-            status: "PUBLISHED",
-            category: "Fashion",
-            socialPlatform: "Instagram",
-            rewardAmount: 500000,
-            campaignFund: 500000,
-            editorRewardPool: 425000,
-            editorSlots: 5,
-            deadline: new Date(Date.now() + 86400000 * 5).toISOString(),
-            _count: { applications: 6, submissions: 4 },
-          },
-          {
-            id: "cmp-2",
-            title: "Tech Unboxing Short Series",
-            thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80",
-            status: "DRAFT",
-            category: "Tech",
-            socialPlatform: "YouTube",
-            rewardAmount: 800000,
-            campaignFund: 800000,
-            editorRewardPool: 680000,
-            editorSlots: 8,
-            deadline: new Date(Date.now() + 86400000 * 8).toISOString(),
-            _count: { applications: 0, submissions: 0 },
-          },
-          {
-            id: "cmp-3",
-            title: "Fitness Workout Clips",
-            thumbnail: null,
-            status: "COMPLETED",
-            category: "Fitness",
-            socialPlatform: "Instagram",
-            rewardAmount: 300000,
-            campaignFund: 300000,
-            editorRewardPool: 255000,
-            editorSlots: 4,
-            deadline: new Date(Date.now() - 86400000 * 2).toISOString(),
-            _count: { applications: 12, submissions: 9 },
-          },
-        ]);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    fetchCampaigns();
+  }, [fetchCampaigns]);
+
+  const handleQuickPause = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (busyId) return;
+    setBusyId(id);
+    try {
+      await api(`/campaigns/${id}/pause`, { method: "POST" });
+      setCampaigns((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: "PAUSED" } : c))
+      );
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to pause campaign");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleQuickPublish = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (busyId) return;
+    setBusyId(id);
+    try {
+      await api(`/campaigns/${id}/publish`, { method: "POST" });
+      setCampaigns((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: "PUBLISHED" } : c))
+      );
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to publish campaign");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleQuickDelete = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (busyId) return;
+    if (!confirm("Are you sure you want to permanently delete this campaign?")) return;
+    setBusyId(id);
+    try {
+      await api(`/campaigns/${id}`, { method: "DELETE" });
+      setCampaigns((prev) => prev.filter((c) => c.id !== id));
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to delete campaign");
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const filtered = campaigns.filter((c) => {
     const matchesFilter = filter === "ALL" ? true : c.status === filter;
@@ -113,22 +125,32 @@ export default function CreatorCampaignsListPage() {
             My Campaigns
           </h1>
           <p className="text-xs text-neutral-400 mt-0.5">
-            Manage your funded briefs, review editor applications, and track view performance.
+            Manage your funded briefs, edit details, pause or resume campaigns, and track editor submissions.
           </p>
         </div>
-        <Link
-          href="/creator/campaigns/new"
-          className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-xs font-bold text-white hover:bg-navy/90 active:scale-[0.99] transition border border-navy/10"
-        >
-          <Plus size={15} /> New Campaign
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchCampaigns}
+            disabled={loading}
+            className="icon-button"
+            title="Refresh list"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin text-navy" : "text-navy"} />
+          </button>
+          <Link
+            href="/creator/campaigns/new"
+            className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-xs font-bold text-white hover:bg-navy/90 active:scale-[0.99] transition border border-navy/10"
+          >
+            <Plus size={15} /> New Campaign
+          </Link>
+        </div>
       </div>
 
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-navy/10 pb-4">
         {/* Filter Tabs */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {["ALL", "DRAFT", "PUBLISHED", "PAUSED", "COMPLETED", "CANCELLED"].map((st) => (
+          {["ALL", "PUBLISHED", "PAUSED", "DRAFT", "COMPLETED", "CANCELLED"].map((st) => (
             <button
               key={st}
               onClick={() => setFilter(st)}
@@ -158,45 +180,64 @@ export default function CreatorCampaignsListPage() {
 
       {loading ? (
         <div className="py-16 text-center text-xs font-bold text-neutral-400">
-          Loading campaigns...
+          Loading campaigns…
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-navy/10 bg-white p-12 text-center text-neutral-500 space-y-3">
-          <p className="font-bold text-sm text-neutral-700">No campaigns found</p>
-          <p className="text-xs text-neutral-400">
-            {search ? "No campaigns match your search query." : "You haven't created any campaigns matching this filter."}
+        <div className="rounded-2xl border border-navy/10 bg-white p-12 text-center shadow-sm">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-navy-soft text-navy mb-3">
+            <TrendingUp size={22} />
+          </div>
+          <h3 className="text-base font-black text-neutral-900">
+            {search || filter !== "ALL" ? "No matching campaigns" : "No campaigns found"}
+          </h3>
+          <p className="mt-1 text-xs text-neutral-400 max-w-sm mx-auto">
+            {search || filter !== "ALL"
+              ? "Try adjusting your search query or status filter."
+              : "Launch your first performance campaign to start receiving viral short-form clips."}
           </p>
-          <Link
-            href="/creator/campaigns/new"
-            className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-bold text-white hover:bg-navy/90 transition border border-navy/10"
-          >
-            <Plus size={14} /> Create Your First Campaign
-          </Link>
+          {!search && filter === "ALL" && (
+            <Link
+              href="/creator/campaigns/new"
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2 text-xs font-bold text-white hover:bg-navy/90 transition"
+            >
+              <Plus size={14} /> Create Campaign
+            </Link>
+          )}
         </div>
       ) : (
-        <div className="divide-y divide-neutral-100 rounded-2xl border border-navy/10 bg-white shadow-xs overflow-hidden">
+        <div className="space-y-3">
           {filtered.map((c) => {
-            const fundMajor = Math.round((c.campaignFund || c.rewardAmount) / 100);
-            const poolMajor = Math.round((c.editorRewardPool || (c.rewardAmount * 0.85)) / 100);
-            const deadlineDate = c.deadline ? new Date(c.deadline).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }) : "Open";
+            const fundMajor = Math.round((c.campaignFund ?? c.rewardAmount) / 100);
+            const poolMajor = Math.round((c.editorRewardPool ?? Math.floor(fundMajor * 85 * 100)) / 100);
+            const deadlineDate = new Date(c.deadline).toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            });
+
+            const isPublished = c.status === "PUBLISHED";
+            const isPaused = c.status === "PAUSED";
+            const isDraft = c.status === "DRAFT";
+            const isCancelled = c.status === "CANCELLED";
 
             return (
               <div
                 key={c.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4 hover:bg-neutral-50/60 transition group"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-navy/10 bg-white p-4 shadow-sm hover:border-navy/30 transition hover:shadow-md"
               >
-                {/* Left: Thumbnail & Info */}
-                <div className="flex items-start sm:items-center gap-4 min-w-0">
-                  {/* Thumbnail */}
-                  <div className="relative aspect-video w-24 sm:w-28 shrink-0 overflow-hidden rounded-xl border border-navy/10 bg-neutral-900">
+                {/* Left: 16:9 Thumbnail + Campaign Info */}
+                <div className="flex items-center gap-4 min-w-0">
+                  {/* 16:9 Video Thumbnail Aspect Container */}
+                  <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-xl bg-neutral-900 border border-navy/10">
                     {c.thumbnail ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={c.thumbnail}
                         alt={c.title}
-                        className="h-full w-full object-cover transition group-hover:scale-105"
+                        className="h-full w-full object-cover group-hover:scale-105 transition duration-300"
                       />
                     ) : (
-                      <CampaignDummyThumbnail
+                      <ThumbnailFallback
                         title={c.title}
                         category={c.category}
                         platform={c.socialPlatform}
@@ -235,8 +276,8 @@ export default function CreatorCampaignsListPage() {
                   </div>
                 </div>
 
-                {/* Right: Financials, Slots & Action */}
-                <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-navy/5">
+                {/* Right: Financials, Slots & Quick CRUD Action Buttons */}
+                <div className="flex items-center justify-between sm:justify-end gap-5 border-t sm:border-t-0 pt-3 sm:pt-0 border-navy/5 flex-wrap">
                   <div className="text-left sm:text-right">
                     <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
                       Fund (85% Pool)
@@ -258,18 +299,102 @@ export default function CreatorCampaignsListPage() {
                     </p>
                   </div>
 
-                  <Link
-                    href={`/creator/campaigns/${c.id}`}
-                    className="rounded-full border border-navy/20 bg-white px-4 py-1.5 text-xs font-bold text-navy hover:bg-navy-soft transition shrink-0 flex items-center gap-1"
-                  >
-                    Manage <ChevronRight size={13} />
-                  </Link>
+                  {/* Action Group */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Quick Pause button */}
+                    {isPublished && (
+                      <button
+                        onClick={(e) => handleQuickPause(c.id, e)}
+                        disabled={busyId === c.id}
+                        className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100 transition inline-flex items-center gap-1"
+                        title="Pause campaign"
+                      >
+                        <Pause size={12} /> Pause
+                      </button>
+                    )}
+
+                    {/* Quick Resume button */}
+                    {isPaused && (
+                      <button
+                        onClick={(e) => handleQuickPublish(c.id, e)}
+                        disabled={busyId === c.id}
+                        className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition inline-flex items-center gap-1"
+                        title="Resume campaign"
+                      >
+                        <Play size={12} /> Resume
+                      </button>
+                    )}
+
+                    {/* Quick Publish for DRAFT */}
+                    {isDraft && (
+                      <button
+                        onClick={(e) => handleQuickPublish(c.id, e)}
+                        disabled={busyId === c.id}
+                        className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition inline-flex items-center gap-1"
+                        title="Publish campaign"
+                      >
+                        <Play size={12} /> Publish
+                      </button>
+                    )}
+
+                    {/* Quick Delete for DRAFT or CANCELLED */}
+                    {(isDraft || isCancelled) && (
+                      <button
+                        onClick={(e) => handleQuickDelete(c.id, e)}
+                        disabled={busyId === c.id}
+                        className="rounded-full border border-red-200 bg-red-50 p-1.5 text-red-600 hover:bg-red-100 transition"
+                        title="Delete campaign"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+
+                    <Link
+                      href={`/creator/campaigns/${c.id}`}
+                      className="rounded-full border border-navy/20 bg-white px-4 py-1.5 text-xs font-bold text-navy hover:bg-navy-soft transition flex items-center gap-1"
+                    >
+                      Manage <ChevronRight size={13} />
+                    </Link>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+function ThumbnailFallback({
+  title,
+  category,
+  platform,
+}: {
+  title: string;
+  category: string;
+  platform: string;
+}) {
+  const gradients: Record<string, string> = {
+    Fashion: "from-purple-900 to-indigo-950",
+    Beauty: "from-pink-900 to-rose-950",
+    Tech: "from-blue-900 to-cyan-950",
+    Gaming: "from-emerald-900 to-teal-950",
+    Fitness: "from-amber-900 to-orange-950",
+  };
+  const gradient = gradients[category] || "from-neutral-900 to-navy";
+
+  return (
+    <div
+      className={`h-full w-full bg-gradient-to-br ${gradient} p-2 flex flex-col justify-between`}
+    >
+      <div className="flex items-center justify-between text-[8px] text-white/70 font-bold uppercase tracking-wider">
+        <span>{category}</span>
+        <ImageIcon size={10} className="text-white/40" />
+      </div>
+      <p className="text-[10px] font-black text-white line-clamp-1 leading-tight">
+        {title}
+      </p>
     </div>
   );
 }

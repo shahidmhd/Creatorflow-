@@ -9,7 +9,6 @@ import {
   Mail,
   ShieldCheck,
   X,
-  Play,
   Eye,
   IndianRupee,
   Scissors,
@@ -349,87 +348,7 @@ function HomeContent() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════
-            HOW IT WORKS — 3 visual cards with images
-        ══════════════════════════════════════════════════ */}
-        <section className="bg-surface py-16 md:py-20">
-          <div className="container">
-            <p className="text-center text-xs font-black uppercase tracking-[.2em] text-navy mb-2">How it works</p>
-            <h2 className="text-center text-3xl md:text-4xl font-black tracking-[-0.05em] mb-12">
-              Three simple steps.
-            </h2>
-            <div className="grid gap-6 md:grid-cols-3">
-              {/* Step 1 — with video image */}
-              <div className="rounded-2xl border border-navy/10 bg-white shadow-sm flex flex-col overflow-hidden">
-                <div className="p-6 flex-1">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-navy text-white">
-                      <Play size={20} />
-                    </span>
-                    <span className="text-4xl font-black text-neutral-100 leading-none">01</span>
-                  </div>
-                  <h3 className="text-lg font-black tracking-[-0.03em] text-neutral-900 mb-2">Brand posts footage</h3>
-                  <p className="text-sm leading-6 text-neutral-500">
-                    Upload your long podcast, event recording, or product video. Set your per-view rate and total budget.
-                  </p>
-                </div>
-                <Image
-                  src="/how_step1_video.webp"
-                  alt="Long video timeline with highlighted best moments"
-                  width={520}
-                  height={200}
-                  className="w-full object-cover"
-                />
-              </div>
 
-              {/* Step 2 — with clips image */}
-              <div className="rounded-2xl border border-navy/10 bg-white shadow-sm flex flex-col overflow-hidden">
-                <div className="p-6 flex-1">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-navy text-white">
-                      <Scissors size={20} />
-                    </span>
-                    <span className="text-4xl font-black text-neutral-100 leading-none">02</span>
-                  </div>
-                  <h3 className="text-lg font-black tracking-[-0.03em] text-neutral-900 mb-2">Editors create short clips</h3>
-                  <p className="text-sm leading-6 text-neutral-500">
-                    Skilled editors apply, cut the best moments, and publish them across Instagram &amp; YouTube.
-                  </p>
-                </div>
-                <Image
-                  src="/how_step2_clips.webp"
-                  alt="Three video clips with view counts and earnings"
-                  width={520}
-                  height={180}
-                  className="w-full object-cover"
-                />
-              </div>
-
-              {/* Step 3 — with payout image */}
-              <div className="rounded-2xl border border-navy/10 bg-white shadow-sm flex flex-col overflow-hidden">
-                <div className="p-6 flex-1">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-navy text-white">
-                      <IndianRupee size={20} />
-                    </span>
-                    <span className="text-4xl font-black text-neutral-100 leading-none">03</span>
-                  </div>
-                  <h3 className="text-lg font-black tracking-[-0.03em] text-neutral-900 mb-2">Pay only for real views</h3>
-                  <p className="text-sm leading-6 text-neutral-500">
-                    Views are verified. Editors earn 85% of the payout. You pay nothing for clips that don&apos;t perform.
-                  </p>
-                </div>
-                <Image
-                  src="/how_step3_payout.webp"
-                  alt="Budget progress bar showing paid out views"
-                  width={520}
-                  height={140}
-                  className="w-full object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* ══════════════════════════════════════════════════
             TRANSPARENT MATH

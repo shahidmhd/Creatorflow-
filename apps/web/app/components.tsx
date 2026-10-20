@@ -44,7 +44,7 @@ export function PublicNav() {
       <div className="flex items-center gap-2">
         <ThemeToggle />
         <Link href="/?auth=creator-login" className="hidden rounded-full border border-navy/20 bg-white px-4 py-2 text-sm font-semibold text-navy sm:block">Creator sign in</Link>
-        <Link href="/?auth=creator-create" className="rounded-full bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-navy">Start a campaign <ArrowRight className="ml-1 inline" size={14} /></Link>
+        <Link href="/?auth=creator-create" className="rounded-full bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy/90 active:scale-[0.99] transition border border-navy/10">Start a campaign <ArrowRight className="ml-1 inline" size={14} /></Link>
         <Link href="/?auth=editor-create" className="hidden rounded-full border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy xl:block">Editor sign in / Join</Link>
         <button className="icon-button shrink-0 xl:hidden" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>{open ? <X /> : <Menu />}</button>
       </div>

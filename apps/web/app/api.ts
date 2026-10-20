@@ -21,6 +21,15 @@ function responseMessage(value: unknown): string | undefined {
   }
   if (value && typeof value === "object") {
     const record = value as Record<string, unknown>;
+    if (record.fields && typeof record.fields === "object") {
+      const fieldEntries = Object.entries(record.fields as Record<string, string[]>);
+      const fieldDetails = fieldEntries
+        .map(([field, errs]) => `${field}: ${Array.isArray(errs) ? errs.join(", ") : errs}`)
+        .join(" • ");
+      if (fieldDetails) {
+        return fieldDetails;
+      }
+    }
     return responseMessage(record.error) ?? responseMessage(record.message);
   }
   return undefined;
@@ -30,6 +39,7 @@ export class ApiError extends Error {
   status: number;
   code?: string;
   data?: unknown;
+  fields?: Record<string, string[]>;
 
   constructor(message: string, status: number, code?: string, data?: unknown) {
     super(message);
@@ -37,6 +47,9 @@ export class ApiError extends Error {
     this.status = status;
     this.code = code;
     this.data = data;
+    if (data && typeof data === "object" && "fields" in data) {
+      this.fields = (data as { fields: Record<string, string[]> }).fields;
+    }
   }
 }
 

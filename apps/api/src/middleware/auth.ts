@@ -35,13 +35,20 @@ export async function authenticate(
         .replace("reviral_token_", "")
         .replace("mock_jwt_token_", "")
         .trim();
+
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawId);
+
       const user = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { id: rawId },
-            { username: rawId },
-          ],
-        },
+        where: isUuid
+          ? { OR: [{ id: rawId }, { username: rawId }] }
+          : {
+              OR: [
+                { username: rawId },
+                { email: rawId },
+                { email: `${rawId}@gmail.com` },
+                { username: rawId.replace(/[^a-zA-Z0-9]/g, "") },
+              ],
+            },
         select: { id: true, supabaseId: true, email: true, name: true, username: true, role: true, isActive: true },
       });
 

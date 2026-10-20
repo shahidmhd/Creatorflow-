@@ -4,6 +4,7 @@ import { NotFoundError, ForbiddenError, ConflictError } from "../errors";
 import { auditLogService } from "./audit-log.service";
 import { notificationService } from "./notification.service";
 import { earningsCalculationService } from "./earnings-calculation.service";
+import { walletService } from "./wallet.service";
 
 const ALLOWED_TRANSITIONS: Record<CampaignStatus, CampaignStatus[]> = {
   DRAFT: [CampaignStatus.PUBLISHED, CampaignStatus.CANCELLED],
@@ -45,6 +46,16 @@ export const campaignService = {
     const slots = data.editorSlots && data.editorSlots > 0 ? data.editorSlots : 1;
     const feePercentage = data.platformFeePercentage ?? 15;
 
+    // Check creator's wallet balance before creating campaign
+    const wallet = await walletService.getByUserId(creatorId);
+    if (wallet.balance < fund) {
+      const avail = (wallet.balance / 100).toLocaleString("en-IN");
+      const req = (fund / 100).toLocaleString("en-IN");
+      throw new ConflictError(
+        `Insufficient wallet balance. Your available balance is ₹${avail}, but funding this campaign requires ₹${req}. Please add funds to your wallet to launch this campaign.`
+      );
+    }
+
     // Authoritative calculation of campaign financial pool & editor caps
     const financials = earningsCalculationService.calculateCampaignFinancials({
       campaignFundMinor: fund,
@@ -60,37 +71,56 @@ export const campaignService = {
       if (earningRate <= 0) earningRate = 1;
     }
 
-    const campaign = await prisma.campaign.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        socialPlatform: data.socialPlatform,
-        videoUrl: data.videoUrl,
-        currency: data.currency ?? "INR",
-        deadline: data.deadline,
-        thumbnail: data.thumbnail,
-        contentRequirements: data.contentRequirements,
-        captionRequirements: data.captionRequirements,
-        hashtagRequirements: data.hashtagRequirements,
-        mentionRequirements: data.mentionRequirements,
-        minimumViews: data.minimumViews ?? 0,
-        minimumEngagement: data.minimumEngagement ?? 0,
-        additionalInstructions: data.additionalInstructions,
-        maxEarn: data.maxEarn ?? financials.maximumEditorEarningMinor,
+    // Deduct escrow atomically with campaign creation
+    const campaign = await prisma.$transaction(async (tx) => {
+      const newBalance = wallet.balance - fund;
+      await tx.wallet.update({
+        where: { id: wallet.id },
+        data: { balance: newBalance },
+      });
 
-        // Core Financial Fields (minor units, e.g. paise)
-        campaignFund: financials.campaignFundMinor,
-        rewardAmount: financials.campaignFundMinor,
-        platformFeePercentage: financials.platformFeePercentage,
-        platformFee: financials.platformFeeMinor,
-        editorRewardPool: financials.editorRewardPoolMinor,
-        editorSlots: financials.editorSlots,
-        maximumEditorEarning: financials.maximumEditorEarningMinor,
-        earningPer1000Views: earningRate,
+      await tx.walletTransaction.create({
+        data: {
+          walletId: wallet.id,
+          type: "ADJUSTMENT",
+          amount: -fund,
+          balance: newBalance,
+          description: `Campaign escrow reserved for "${data.title}"`,
+        },
+      });
 
-        creatorId,
-      },
+      return tx.campaign.create({
+        data: {
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          socialPlatform: data.socialPlatform,
+          videoUrl: data.videoUrl,
+          currency: data.currency ?? "INR",
+          deadline: data.deadline,
+          thumbnail: data.thumbnail,
+          contentRequirements: data.contentRequirements,
+          captionRequirements: data.captionRequirements,
+          hashtagRequirements: data.hashtagRequirements,
+          mentionRequirements: data.mentionRequirements,
+          minimumViews: data.minimumViews ?? 0,
+          minimumEngagement: data.minimumEngagement ?? 0,
+          additionalInstructions: data.additionalInstructions,
+          maxEarn: data.maxEarn ?? financials.maximumEditorEarningMinor,
+
+          // Core Financial Fields (minor units, e.g. paise)
+          campaignFund: financials.campaignFundMinor,
+          rewardAmount: financials.campaignFundMinor,
+          platformFeePercentage: financials.platformFeePercentage,
+          platformFee: financials.platformFeeMinor,
+          editorRewardPool: financials.editorRewardPoolMinor,
+          editorSlots: financials.editorSlots,
+          maximumEditorEarning: financials.maximumEditorEarningMinor,
+          earningPer1000Views: earningRate,
+
+          creatorId,
+        },
+      });
     });
 
     await auditLogService.log(creatorId, "CAMPAIGN_CREATED", "Campaign", campaign.id, null, {

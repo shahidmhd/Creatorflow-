@@ -125,8 +125,11 @@ export default function CreatorOverviewPage() {
     setLoading(true);
     setError("");
     try {
-      // 1. Fetch creator's campaigns
-      const camps = await api<CampaignItem[]>("/campaigns/mine?limit=20").catch(() => [] as CampaignItem[]);
+      // 1. Fetch creator's campaigns and wallet balance
+      const [camps, walletData] = await Promise.all([
+        api<CampaignItem[]>("/campaigns/mine?limit=20").catch(() => [] as CampaignItem[]),
+        api<{ balance: number }>("/wallet").catch(() => null),
+      ]);
       const campaignList = Array.isArray(camps) ? camps : [];
       setCampaigns(campaignList);
 
@@ -137,6 +140,8 @@ export default function CreatorOverviewPage() {
         (sum, c) => sum + (c.editorRewardPool || c.campaignFund || c.rewardAmount || 0),
         0
       ) / 100;
+
+      const walletBalMajor = walletData?.balance ? Math.round(walletData.balance / 100) : 0;
 
       // 2. Fetch submissions for published/active campaigns
       const activeCamps = campaignList
@@ -173,12 +178,12 @@ export default function CreatorOverviewPage() {
       const pendingSubs = displaySubs.filter((s) => s.status === "SUBMITTED").length;
 
       setStats({
-        activeCampaigns: activeCount > 0 ? activeCount : 1,
-        totalPoolRemaining: computedPool > 0 ? computedPool : 53500,
+        activeCampaigns: activeCount > 0 ? activeCount : 0,
+        totalPoolRemaining: walletBalMajor > 0 ? walletBalMajor : (computedPool > 0 ? computedPool : 0),
         totalViewsDelivered: 59800,
         totalSpentThisMonth: 6384,
-        totalApplications: totalApps > 0 ? totalApps : 12,
-        submissionsToReview: pendingSubs > 0 ? pendingSubs : 2,
+        totalApplications: totalApps > 0 ? totalApps : 0,
+        submissionsToReview: pendingSubs > 0 ? pendingSubs : 0,
       });
     } catch {
       setError("Failed to load dashboard data. Showing saved overview.");
@@ -306,7 +311,7 @@ export default function CreatorOverviewPage() {
           </button>
           <Link
             href="/creator/campaigns/new"
-            className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-xs font-bold text-white shadow-navy hover:opacity-95 transition"
+            className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-xs font-bold text-white hover:bg-navy/90 active:scale-[0.99] transition border border-navy/10"
           >
             <Plus size={15} /> New Campaign
           </Link>

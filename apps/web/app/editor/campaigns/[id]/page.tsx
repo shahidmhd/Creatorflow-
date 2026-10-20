@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Clock, Send, AlertCircle, Loader2, Users, Eye, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock, Send, AlertCircle, Loader2, Users, Eye, Sparkles, Instagram, Youtube } from "lucide-react";
 import { api, ApiError } from "@/app/api";
 import { CampaignDummyThumbnail } from "@/app/components";
 
@@ -189,8 +189,18 @@ export default function EditorCampaignDetailPage() {
             />
           )}
 
-          <div className="absolute right-4 top-4 rounded-full bg-black/75 px-3 py-1 text-xs font-bold text-white backdrop-blur shadow-sm">
-            {campaign.socialPlatform === "YouTube" ? "▶ YouTube" : "📸 Instagram"}
+          <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-black/75 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md border border-white/10 shadow-xs">
+            {campaign.socialPlatform === "YouTube" ? (
+              <span className="flex items-center gap-1.5">
+                <Youtube size={14} className="text-red-500 fill-red-500" />
+                <span>YouTube</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Instagram size={14} className="text-pink-400" />
+                <span>Instagram</span>
+              </span>
+            )}
           </div>
         </div>
 

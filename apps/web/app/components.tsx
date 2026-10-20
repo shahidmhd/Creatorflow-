@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Moon, Sun, Menu, X, ArrowRight, Sparkles } from "lucide-react";
+import { Moon, Sun, Menu, X, ArrowRight, Sparkles, Instagram, Youtube, Users, CheckCircle2, TrendingUp } from "lucide-react";
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(false);
@@ -172,16 +172,17 @@ export function CampaignCard({
       ? campaign.remainingSlots
       : Math.max(0, totalSlots - approvedCount);
 
+  const percentFilled = Math.min(100, Math.round(((totalSlots - remaining) / totalSlots) * 100));
   const targetLink = href || `/editor/campaigns/${campaign.id}`;
 
   return (
     <Link
       href={targetLink}
-      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-navy/10 bg-white p-3 shadow-sm hover:shadow-navy transition duration-300"
+      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-navy/10 bg-white p-3.5 shadow-xs hover:border-navy/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
     >
       <div>
         {/* 16:9 Thumbnail or Dummy Image */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900">
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900 border border-navy/5">
           {campaign.thumbnail && !imgError ? (
             <img
               src={campaign.thumbnail}
@@ -197,22 +198,24 @@ export function CampaignCard({
             />
           )}
 
-          {/* Platform Badge Overlay */}
-          <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur shadow-sm">
+          {/* Platform Badge Overlay with Lucide Icons */}
+          <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/75 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-md border border-white/10 shadow-xs">
             {campaign.socialPlatform === "YouTube" ? (
-              <span className="flex items-center gap-1">
-                <span className="text-red-500 font-black">▶</span> YouTube
+              <span className="flex items-center gap-1.5 text-white">
+                <Youtube size={13} className="text-red-500 fill-red-500" />
+                <span>YouTube</span>
               </span>
             ) : (
-              <span className="flex items-center gap-1">
-                <span className="text-pink-400 font-black">📸</span> Instagram
+              <span className="flex items-center gap-1.5 text-white">
+                <Instagram size={13} className="text-pink-400" />
+                <span>Instagram</span>
               </span>
             )}
           </div>
         </div>
 
         {/* Creator Info Row */}
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-navy text-[10px] font-black text-white">
               {campaign.creator?.name?.slice(0, 2).toUpperCase() || "CF"}
@@ -221,28 +224,28 @@ export function CampaignCard({
               <span className="truncate text-xs font-bold text-neutral-800">
                 {campaign.creator?.name || "Creator"}
               </span>
-              <span className="text-amber-500 text-xs shrink-0" title="Verified Creator">
-                ✓
+              <span title="Verified Creator" className="inline-flex shrink-0">
+                <CheckCircle2 size={13} className="text-sky-500 fill-sky-500/20" />
               </span>
             </div>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+          <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
             {campaign.category}
           </span>
         </div>
 
         {/* Campaign Title */}
-        <h3 className="mt-2 line-clamp-2 text-sm font-black tracking-tight text-neutral-900 group-hover:text-navy transition leading-snug">
+        <h3 className="mt-2.5 line-clamp-2 text-sm font-black tracking-tight text-neutral-900 group-hover:text-navy transition leading-snug">
           {campaign.title}
         </h3>
       </div>
 
       {/* Financials & Slot Metrics Footer */}
-      <div className="mt-4 border-t border-navy/5 pt-3 space-y-2">
+      <div className="mt-4 border-t border-navy/5 pt-3 space-y-2.5">
         <div className="flex items-center justify-between text-xs">
           <div>
             <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-              Max Earning
+              Max Payout
             </span>
             <span className="text-sm font-black text-emerald-600">
               ₹{maxEarningMajor.toLocaleString("en-IN")}
@@ -250,25 +253,36 @@ export function CampaignCard({
           </div>
 
           <div className="text-right">
-            <span className="inline-block rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700 border border-emerald-200">
-              ₹{rateVal} / 1k views
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700 border border-emerald-200">
+              <TrendingUp size={11} className="shrink-0" />
+              <span>₹{rateVal} / 1k</span>
             </span>
           </div>
         </div>
 
-        {/* Slots remaining bar */}
-        <div className="flex items-center justify-between text-[11px] text-neutral-500 font-semibold pt-1">
-          <span className="flex items-center gap-1">
-            <span className="text-xs">👥</span>
-            <span>
-              {remaining} / {totalSlots} slots left
+        {/* Slots remaining bar with Lucide Users icon */}
+        <div className="space-y-1.5 pt-0.5">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-neutral-500">
+            <span className="flex items-center gap-1.5">
+              <Users size={12} className="text-navy shrink-0" />
+              <span className={remaining === 0 ? "text-red-600 font-bold" : "text-neutral-700"}>
+                {remaining === 0 ? "Slots full" : `${remaining} of ${totalSlots} slots left`}
+              </span>
             </span>
-          </span>
-          {campaign.minimumViews && campaign.minimumViews > 0 ? (
-            <span className="text-[10px] text-neutral-400">
-              Min {campaign.minimumViews.toLocaleString()} views
-            </span>
-          ) : null}
+            {campaign.minimumViews && campaign.minimumViews > 0 ? (
+              <span className="text-[10px] text-neutral-400">
+                Min {campaign.minimumViews.toLocaleString()} views
+              </span>
+            ) : null}
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                remaining === 0 ? "bg-red-500" : "bg-navy"
+              }`}
+              style={{ width: `${percentFilled}%` }}
+            />
+          </div>
         </div>
       </div>
     </Link>

@@ -12,6 +12,8 @@ import {
   Play,
   Trash2,
   RefreshCw,
+  Instagram,
+  Youtube,
 } from "lucide-react";
 import { api } from "@/app/api";
 import { StatusBadge } from "@/app/components";
@@ -255,9 +257,9 @@ export default function CreatorCampaignsListPage() {
                     {/* Platform Badge Overlay */}
                     <div className="absolute top-1.5 right-1.5 rounded-full bg-black/75 px-1.5 py-0.5 text-[9px] font-bold text-white backdrop-blur-xs flex items-center gap-1">
                       {c.socialPlatform === "YouTube" ? (
-                        <span className="text-red-400 font-bold">▶</span>
+                        <Youtube size={10} className="text-red-500 fill-red-500" />
                       ) : (
-                        <span className="text-pink-400 font-bold">📸</span>
+                        <Instagram size={10} className="text-pink-400" />
                       )}
                     </div>
                   </div>

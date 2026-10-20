@@ -13,6 +13,8 @@ import {
   Eye,
   IndianRupee,
   Scissors,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { Footer, PublicNav, CampaignCard, CampaignCardData } from "./components";
@@ -217,57 +219,108 @@ function HomeContent() {
       <main>
 
         {/* ══════════════════════════════════════════════════
-            HERO — compact, step 1 image only
+            HERO — Single Image Multi-Step Product Workflow
         ══════════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden bg-white px-6 py-16 md:py-20">
-          <div className="container">
-            <div className="grid gap-10 md:grid-cols-2 md:items-center">
-              {/* Left: copy */}
-              <div>
-                <p className="text-sm font-black uppercase tracking-[.18em] text-navy mb-4">
+        <section className="relative overflow-hidden bg-white px-6 py-14 md:py-20 border-b border-neutral-100">
+          <div className="container max-w-7xl mx-auto">
+            <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
+              {/* Left: Value Proposition & CTAs */}
+              <div className="lg:col-span-5">
+                <div className="inline-flex items-center gap-2 rounded-full bg-navy/5 border border-navy/15 px-3.5 py-1 text-xs font-black uppercase tracking-[.18em] text-navy mb-4">
+                  <Sparkles size={13} className="text-navy" />
                   Long videos in. Short clips out.
-                </p>
-                <h1 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-[-0.05em] text-neutral-900">
+                </div>
+                <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-black leading-[1.02] tracking-[-0.04em] text-neutral-900">
                   Every great moment deserves a second&nbsp;life.
                 </h1>
-                <p className="mt-5 max-w-md text-base leading-7 text-neutral-500">
-                  Got a long video, like a podcast or a talk? Editors on Reviral cut it into
-                  short clips and post them online. You set a budget and pay only for the views
-                  those clips really get.
+                <p className="mt-5 text-base md:text-lg leading-relaxed text-neutral-600">
+                  Got a long video, like a podcast or a talk? Skilled editors on Reviral cut it into high-converting 9:16 short clips. You set a budget and pay only for verified views those clips actually get.
                 </p>
-                <div className="mt-7 flex flex-wrap gap-3">
+
+                {/* Primary Actions */}
+                <div className="mt-8 flex flex-wrap items-center gap-3">
                   <Link
                     href="/?auth=creator-create"
                     id="cta-footage"
-                    className="inline-flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-black text-white shadow-navy hover:opacity-95 transition"
+                    className="inline-flex items-center gap-2 rounded-full bg-navy px-7 py-3.5 text-sm font-black text-white hover:bg-navy/90 hover:shadow-md active:scale-[0.98] transition-all"
                   >
-                    I have the footage <ArrowRight size={15} />
+                    I have footage <ArrowRight size={15} />
                   </Link>
                   <Link
                     href="/?auth=editor-create"
                     id="cta-edit"
-                    className="inline-flex items-center gap-2 rounded-full border border-navy/25 bg-white px-6 py-3 text-sm font-black text-neutral-800 hover:bg-neutral-50 transition"
+                    className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-7 py-3.5 text-sm font-black text-neutral-800 hover:bg-neutral-50 hover:border-neutral-400 active:scale-[0.98] transition-all"
                   >
-                    I have the edit <ArrowRight size={15} />
+                    I want to edit <Scissors size={14} className="text-neutral-500" />
                   </Link>
+                </div>
+
+                {/* Trust & Transparency Badges */}
+                <div className="mt-8 pt-6 border-t border-neutral-100 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs font-bold text-neutral-500">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-emerald-600" />
+                    <span>100% Verified Views</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <IndianRupee size={14} className="text-navy" />
+                    <span>85% Editor Payouts</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck size={15} className="text-navy" />
+                    <span>Escrow Protection</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Right: step 1 visual only */}
-              <div className="rounded-2xl bg-[#17345c] p-5 text-white shadow-xl">
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white/60 mb-3">
-                  <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 text-[10px] font-black text-white">1</span>
-                  A brand shares one long video
+              {/* Right: Single Image Multi-Step Product Workflow */}
+              <div className="lg:col-span-7">
+                <div className="relative group overflow-hidden rounded-2xl bg-[#0B1528] border border-navy/20 shadow-2xl transition-all duration-300 hover:border-navy/40">
+                  {/* Mockup browser/app header bar */}
+                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#08101E]/90 backdrop-blur-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]/80" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]/80" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#27C93F]/80" />
+                      </div>
+                      <span className="ml-2 text-[11px] font-semibold text-white/50 tracking-wider uppercase">
+                        Reviral Workflow Engine
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      End-to-End Pipeline
+                    </div>
+                  </div>
+
+                  {/* The multi-step infographic */}
+                  <div className="relative bg-[#0B1528] p-1.5">
+                    <Image
+                      src="/reviral_product_workflow.jpg"
+                      alt="Reviral Complete Product Workflow: Step 1 Long Video In, Step 2 Editor Network creates clips, Step 3 Verified Views & Payouts"
+                      width={960}
+                      height={720}
+                      className="w-full h-auto object-cover rounded-xl"
+                      priority
+                    />
+                  </div>
+
+                  {/* Bottom step indicators */}
+                  <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10 bg-[#08101E] py-2.5 px-3 text-center">
+                    <div className="px-2">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-sky-400">Step 01</p>
+                      <p className="text-xs font-bold text-white truncate">Long Video In</p>
+                    </div>
+                    <div className="px-2">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-indigo-400">Step 02</p>
+                      <p className="text-xs font-bold text-white truncate">Editors Cut Shorts</p>
+                    </div>
+                    <div className="px-2">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-emerald-400">Step 03</p>
+                      <p className="text-xs font-bold text-emerald-300 truncate">Pay Only for Views</p>
+                    </div>
+                  </div>
                 </div>
-                <Image
-                  src="/how_step1_video.webp"
-                  alt="Brand shares a long video with highlight segments"
-                  width={520}
-                  height={200}
-                  className="w-full rounded-xl object-cover"
-                  priority
-                />
-                <p className="text-[10px] text-white/40 mt-2">Podcast episode, 58 min · The white parts are the best moments.</p>
               </div>
             </div>
           </div>

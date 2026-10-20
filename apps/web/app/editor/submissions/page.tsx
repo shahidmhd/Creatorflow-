@@ -18,16 +18,28 @@ interface MySubmission {
     id: string;
     title: string;
     rewardAmount: number;
+    campaignFund?: number;
+    editorRewardPool?: number;
     currency: string;
     creator?: {
       name: string;
+      username?: string;
     };
   };
   publishedPost?: {
     id: string;
     postUrl: string;
+    verifiedViews?: number;
     status: "PENDING_VERIFICATION" | "VERIFIED" | "REJECTED";
-  };
+    reward?: {
+      id: string;
+      netAmount: number;
+      grossAmount: number;
+      platformFee: number;
+      status: string;
+      verifiedViews: number;
+    } | null;
+  } | null;
 }
 
 interface MyApplication {
@@ -266,7 +278,7 @@ export default function EditorSubmissionsPage() {
               <button
                 type="submit"
                 disabled={submittingContent}
-                className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2 text-xs font-bold text-white shadow-navy hover:opacity-90 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2 text-xs font-bold text-white hover:bg-navy/90 active:scale-[0.99] transition disabled:opacity-50"
               >
                 {submittingContent ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
                 Upload Submission
@@ -348,17 +360,70 @@ export default function EditorSubmissionsPage() {
                     </p>
 
                     {sub.publishedPost ? (
-                      <div className="flex items-center justify-between text-xs font-bold bg-emerald-50 border border-emerald-200 p-3 rounded-lg text-emerald-800">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 size={16} className="text-emerald-600" />
-                          <span>
-                            URL Submitted:{" "}
-                            <a href={sub.publishedPost.postUrl} target="_blank" rel="noreferrer" className="underline font-mono">
+                      <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold bg-white border border-navy/10 p-3 rounded-xl text-neutral-800">
+                          <div className="flex items-center gap-2 truncate">
+                            <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                            <span className="text-neutral-400">Post URL:</span>
+                            <a
+                              href={sub.publishedPost.postUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-navy underline font-mono truncate"
+                            >
                               {sub.publishedPost.postUrl}
                             </a>
-                          </span>
+                            <ExternalLink size={12} className="text-navy shrink-0" />
+                          </div>
+                          <StatusBadge status={sub.publishedPost.status} />
                         </div>
-                        <StatusBadge status={sub.publishedPost.status} />
+
+                        {sub.publishedPost.status === "VERIFIED" ? (
+                          <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-4 space-y-3">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-xs font-bold text-emerald-950">
+                                  Verified Performance & Payout Breakdown
+                                </span>
+                              </div>
+                              <span className="rounded-full bg-emerald-600 text-white px-2.5 py-0.5 text-[10px] font-black uppercase">
+                                ✓ Credited to Wallet
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1 text-xs">
+                              <div>
+                                <span className="block text-[10px] font-bold uppercase text-emerald-800/70">
+                                  Verified Views
+                                </span>
+                                <span className="text-base font-black text-emerald-950">
+                                  {(sub.publishedPost.verifiedViews || 0).toLocaleString("en-IN")} views
+                                </span>
+                              </div>
+                              <div>
+                                <span className="block text-[10px] font-bold uppercase text-emerald-800/70">
+                                  Editor Payout (85%)
+                                </span>
+                                <span className="text-base font-black text-emerald-700">
+                                  ₹{Math.round((sub.publishedPost.reward?.netAmount ?? editorEarning * 100) / 100).toLocaleString("en-IN")}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="block text-[10px] font-bold uppercase text-emerald-800/70">
+                                  Platform Fee (15%)
+                                </span>
+                                <span className="text-base font-black text-neutral-600">
+                                  ₹{Math.round((sub.publishedPost.reward?.platformFee ?? 0) / 100).toLocaleString("en-IN")}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 p-2.5 rounded-lg font-medium">
+                            URL submitted. Awaiting creator view verification to calculate and release your reward.
+                          </p>
+                        )}
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
@@ -375,7 +440,7 @@ export default function EditorSubmissionsPage() {
                         <button
                           onClick={() => handlePostSubmit(sub.id)}
                           disabled={submittingPostId === sub.id || !postUrlInput[sub.id]?.trim()}
-                          className="rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white shadow-navy disabled:opacity-50 flex items-center gap-1.5"
+                          className="rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white hover:bg-navy/90 active:scale-[0.99] transition disabled:opacity-50 flex items-center gap-1.5 shrink-0"
                         >
                           {submittingPostId === sub.id ? (
                             <>

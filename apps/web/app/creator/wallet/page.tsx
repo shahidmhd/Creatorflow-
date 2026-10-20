@@ -30,6 +30,8 @@ interface WalletData {
   userId: string;
   balance: number;
   currency: string;
+  activeEscrowBalance?: number;
+  totalDisbursedBalance?: number;
   transactions?: Transaction[];
 }
 
@@ -102,6 +104,9 @@ export default function CreatorWalletPage() {
   };
 
   const balanceMajor = wallet ? Math.round(wallet.balance / 100) : 0;
+  const activeEscrowMajor = wallet?.activeEscrowBalance ? Math.round(wallet.activeEscrowBalance / 100) : 0;
+  const totalDisbursedMajor = wallet?.totalDisbursedBalance ? Math.round(wallet.totalDisbursedBalance / 100) : 0;
+  const totalAccountValue = balanceMajor + activeEscrowMajor;
 
   return (
     <div className="space-y-6">
@@ -151,11 +156,11 @@ export default function CreatorWalletPage() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-3">
-          {/* Main Balance Card */}
-          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-xs md:col-span-1 space-y-5">
+          {/* Main Balance & Escrow Summary Card */}
+          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-xs md:col-span-1 space-y-4">
             <div className="flex items-center justify-between text-neutral-400">
               <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">
-                Available Wallet Balance
+                Available Balance
               </span>
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-navy-soft text-navy">
                 <WalletIcon size={16} />
@@ -163,11 +168,11 @@ export default function CreatorWalletPage() {
             </div>
 
             <div>
-              <p className="text-4xl font-black tracking-[-0.04em] text-neutral-900">
+              <p className="text-3xl font-black tracking-[-0.04em] text-neutral-900">
                 ₹{balanceMajor.toLocaleString("en-IN")}
               </p>
-              <p className="text-xs font-medium text-neutral-400 mt-1">
-                Real escrow funds ready to allocate to your upcoming campaigns.
+              <p className="text-xs font-medium text-neutral-400 mt-0.5">
+                Unallocated funds ready to fund new campaigns.
               </p>
             </div>
 
@@ -175,15 +180,31 @@ export default function CreatorWalletPage() {
               onClick={() => setIsModalOpen(true)}
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-navy py-2.5 text-xs font-bold text-white hover:bg-navy/90 active:scale-[0.99] transition border border-navy/10"
             >
-              <Plus size={14} /> Add Funds to Wallet
+              <Plus size={14} /> Add Funds
             </button>
 
-            <div className="rounded-xl bg-navy-soft/60 p-3.5 text-xs text-neutral-600 space-y-1.5 border border-navy/5">
-              <div className="flex items-center gap-1.5 font-bold text-navy">
-                <ShieldCheck size={14} className="text-emerald-600" /> Transparent Escrow
+            {/* Escrow & Disbursement Breakdown */}
+            <div className="space-y-2 pt-2 border-t border-navy/5">
+              <div className="flex items-center justify-between rounded-xl bg-surface/80 p-2.5 text-xs">
+                <span className="font-semibold text-neutral-600">Active Campaign Escrow:</span>
+                <span className="font-bold text-navy">₹{activeEscrowMajor.toLocaleString("en-IN")}</span>
               </div>
-              <p className="text-[11px] text-neutral-500 leading-relaxed">
-                When you launch a campaign, funds are held safely in escrow. Editors only earn from verified views, and unspent pools remain in your account.
+              <div className="flex items-center justify-between rounded-xl bg-surface/80 p-2.5 text-xs">
+                <span className="font-semibold text-neutral-600">Disbursed to Editors:</span>
+                <span className="font-bold text-emerald-600">₹{totalDisbursedMajor.toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-navy-soft/60 p-2.5 text-xs font-bold text-navy">
+                <span>Total Account Value:</span>
+                <span>₹{totalAccountValue.toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-navy-soft/40 p-3 text-xs text-neutral-600 space-y-1 border border-navy/5">
+              <div className="flex items-center gap-1.5 font-bold text-navy text-[11px]">
+                <ShieldCheck size={13} className="text-emerald-600" /> Transparent Escrow Protection
+              </div>
+              <p className="text-[10px] text-neutral-500 leading-relaxed">
+                Campaign funds are held safely in escrow. Editors only earn from verified views, and unspent balances remain yours.
               </p>
             </div>
           </div>
@@ -240,14 +261,20 @@ export default function CreatorWalletPage() {
                       </div>
 
                       <div className="text-right shrink-0">
-                        <span
-                          className={`text-sm font-black ${
-                            isNegative ? "text-neutral-900" : "text-emerald-600"
-                          }`}
-                        >
-                          {isNegative ? "-" : "+"}₹{major.toLocaleString("en-IN")}
-                        </span>
-                        <p className="text-[10px] text-neutral-400 font-medium">
+                        {tx.amount === 0 ? (
+                          <span className="inline-block rounded-full bg-navy-soft px-2.5 py-0.5 text-[11px] font-bold text-navy">
+                            Escrow Payout
+                          </span>
+                        ) : (
+                          <span
+                            className={`text-sm font-black ${
+                              isNegative ? "text-neutral-900" : "text-emerald-600"
+                            }`}
+                          >
+                            {isNegative ? "-" : "+"}₹{major.toLocaleString("en-IN")}
+                          </span>
+                        )}
+                        <p className="text-[10px] text-neutral-400 font-medium mt-0.5">
                           Bal: ₹{(tx.balance / 100).toLocaleString("en-IN")}
                         </p>
                       </div>

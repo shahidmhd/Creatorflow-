@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middleware/auth";
-import { requireCreator, requireAdmin } from "../middleware/role";
+import { requireCreator, requireEditor, requireAdmin } from "../middleware/role";
 import { validate } from "../middleware/validate";
 import { campaignService } from "../services/campaign.service";
 import { createCampaignSchema, updateCampaignSchema, campaignQuerySchema, campaignIdSchema } from "../validators/campaign.validator";
@@ -41,6 +41,14 @@ campaignRoutes.get("/mine", authenticate, requireCreator, async (req, res, next)
 campaignRoutes.get("/creator/overview", authenticate, requireCreator, async (req, res, next) => {
   try {
     const data = await campaignService.getCreatorOverview((req as AuthRequest).user.id);
+    success(res, data);
+  } catch (err) { next(err); }
+});
+
+/** GET /api/v1/campaigns/editor/overview — aggregate real dashboard statistics for editor */
+campaignRoutes.get("/editor/overview", authenticate, requireEditor, async (req, res, next) => {
+  try {
+    const data = await campaignService.getEditorOverview((req as AuthRequest).user.id);
     success(res, data);
   } catch (err) { next(err); }
 });

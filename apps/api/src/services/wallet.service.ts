@@ -14,7 +14,35 @@ export const walletService = {
         include: { transactions: true },
       });
     }
-    return wallet;
+
+    // Compute active escrow and disbursed amounts for creator's campaigns
+    const campaigns = await prisma.campaign.findMany({
+      where: { creatorId: userId },
+      include: {
+        rewards: {
+          where: { status: "CREDITED" },
+          select: { grossAmount: true, netAmount: true },
+        },
+      },
+    });
+
+    let activeEscrowMinor = 0;
+    let totalDisbursedMinor = 0;
+
+    for (const c of campaigns) {
+      const grossPaid = c.rewards.reduce((sum, r) => sum + r.grossAmount, 0);
+      totalDisbursedMinor += grossPaid;
+      if (c.status === "PUBLISHED" || c.status === "PAUSED") {
+        const initialFund = c.campaignFund || c.rewardAmount || 0;
+        activeEscrowMinor += Math.max(0, initialFund - grossPaid);
+      }
+    }
+
+    return {
+      ...wallet,
+      activeEscrowBalance: activeEscrowMinor,
+      totalDisbursedBalance: totalDisbursedMinor,
+    };
   },
 
   async getBalance(userId: string): Promise<number> {

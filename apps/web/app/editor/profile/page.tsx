@@ -202,7 +202,7 @@ export default function EditorProfilePage() {
             <button
               type="button"
               onClick={handleAddSkill}
-              className="rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white shadow-navy"
+              className="rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white hover:bg-navy/90 transition"
             >
               Add Skill
             </button>
@@ -278,7 +278,7 @@ export default function EditorProfilePage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-navy px-7 py-2.5 text-sm font-bold text-white shadow-navy hover:opacity-90"
+            className="rounded-full bg-navy px-7 py-2.5 text-sm font-bold text-white hover:bg-navy/90 active:scale-[0.99] transition disabled:opacity-50"
           >
             {loading ? "Saving..." : "Save Profile"}
           </button>

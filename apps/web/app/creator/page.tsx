@@ -30,6 +30,7 @@ interface CampaignItem {
   rewardAmount: number;
   campaignFund?: number;
   editorRewardPool?: number;
+  editorRewardPoolRemaining?: number;
   deadline: string;
   _count?: {
     applications: number;
@@ -123,7 +124,7 @@ export default function CreatorOverviewPage() {
         const activePool =
           campaignList
             .filter((c) => c.status === "PUBLISHED")
-            .reduce((sum, c) => sum + (c.editorRewardPool || c.campaignFund || c.rewardAmount || 0), 0) / 100;
+            .reduce((sum, c) => sum + (c.editorRewardPoolRemaining ?? c.editorRewardPool ?? c.campaignFund ?? c.rewardAmount ?? 0), 0) / 100;
         const walletBalMajor = walletData?.balance ? Math.round(walletData.balance / 100) : 0;
 
         return {
@@ -474,6 +475,9 @@ export default function CreatorOverviewPage() {
               <div className="divide-y divide-neutral-100">
                 {campaigns.map((c) => {
                   const gross = Math.round((c.editorRewardPool || c.campaignFund || c.rewardAmount) / 100);
+                  const remainingPool = c.editorRewardPoolRemaining !== undefined
+                    ? Math.round(c.editorRewardPoolRemaining / 100)
+                    : gross;
                   return (
                     <div
                       key={c.id}
@@ -487,7 +491,7 @@ export default function CreatorOverviewPage() {
                           {c.title}
                         </Link>
                         <p className="text-xs text-neutral-400 mt-0.5">
-                          {c.socialPlatform} · {c.category} · Budget: ₹{gross.toLocaleString("en-IN")}
+                          {c.socialPlatform} · {c.category} · Pool: ₹{remainingPool.toLocaleString("en-IN")} left of ₹{gross.toLocaleString("en-IN")}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">

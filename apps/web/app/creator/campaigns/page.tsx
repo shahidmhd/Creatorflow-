@@ -26,6 +26,10 @@ interface CampaignItem {
   rewardAmount: number;
   campaignFund?: number;
   editorRewardPool?: number;
+  editorRewardPoolRemaining?: number;
+  campaignFundRemaining?: number;
+  totalPaidNet?: number;
+  totalDisbursedGross?: number;
   editorSlots?: number;
   deadline: string;
   _count?: {
@@ -209,6 +213,10 @@ export default function CreatorCampaignsListPage() {
           {filtered.map((c) => {
             const fundMajor = Math.round((c.campaignFund ?? c.rewardAmount) / 100);
             const poolMajor = Math.round((c.editorRewardPool ?? Math.floor(fundMajor * 85 * 100)) / 100);
+            const poolRemainingMajor =
+              c.editorRewardPoolRemaining !== undefined
+                ? Math.round(c.editorRewardPoolRemaining / 100)
+                : poolMajor;
             const deadlineDate = new Date(c.deadline).toLocaleDateString("en-IN", {
               day: "numeric",
               month: "short",
@@ -280,12 +288,12 @@ export default function CreatorCampaignsListPage() {
                 <div className="flex items-center justify-between sm:justify-end gap-5 border-t sm:border-t-0 pt-3 sm:pt-0 border-navy/5 flex-wrap">
                   <div className="text-left sm:text-right">
                     <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
-                      Fund (85% Pool)
+                      Editor Pool (Remaining)
                     </p>
                     <p className="text-sm font-black text-neutral-900">
-                      ₹{fundMajor.toLocaleString("en-IN")}{" "}
-                      <span className="text-xs font-semibold text-emerald-600">
-                        (₹{poolMajor.toLocaleString("en-IN")})
+                      ₹{poolRemainingMajor.toLocaleString("en-IN")}{" "}
+                      <span className="text-xs font-normal text-neutral-500">
+                        / ₹{poolMajor.toLocaleString("en-IN")}
                       </span>
                     </p>
                   </div>

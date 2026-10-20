@@ -90,7 +90,28 @@ export const submissionService = {
   async findByEditor(editorId: string) {
     return prisma.contentSubmission.findMany({
       where: { editorId },
-      include: { campaign: { select: { id: true, title: true, rewardAmount: true, currency: true } } },
+      include: {
+        campaign: {
+          select: {
+            id: true,
+            title: true,
+            rewardAmount: true,
+            campaignFund: true,
+            editorRewardPool: true,
+            maximumEditorEarning: true,
+            earningPer1000Views: true,
+            socialPlatform: true,
+            category: true,
+            currency: true,
+            creator: { select: { id: true, name: true, username: true, avatarUrl: true } },
+          },
+        },
+        publishedPost: {
+          include: {
+            reward: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   },

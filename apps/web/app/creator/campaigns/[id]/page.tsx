@@ -35,9 +35,13 @@ interface CreatorCampaign {
   socialPlatform: string;
   category: string;
   campaignFund?: number;
+  campaignFundRemaining?: number;
   rewardAmount: number;
   platformFee?: number;
   editorRewardPool?: number;
+  editorRewardPoolRemaining?: number;
+  totalPaidNet?: number;
+  totalDisbursedGross?: number;
   editorSlots?: number;
   approvedEditorsCount?: number;
   remainingSlots?: number;
@@ -501,11 +505,36 @@ export default function CreatorCampaignDetailPage() {
     );
   }
 
-  const campaignFund = (campaign.campaignFund ?? campaign.rewardAmount) / 100;
-  const editorPool = (campaign.editorRewardPool ?? Math.floor(campaignFund * 85)) / 100;
+  const campaignFundTotal = (campaign.campaignFund ?? campaign.rewardAmount) / 100;
+  const editorPoolTotal = (campaign.editorRewardPool ?? Math.floor(campaignFundTotal * 85)) / 100;
+
+  const paidNetMajor = campaign.totalPaidNet !== undefined
+    ? Math.round(campaign.totalPaidNet / 100)
+    : Math.round(
+        posts
+          .filter((p) => p.reward?.status === "CREDITED")
+          .reduce((sum, p) => sum + (p.reward?.netAmount || 0), 0) / 100
+      );
+
+  const disbursedGrossMajor = campaign.totalDisbursedGross !== undefined
+    ? Math.round(campaign.totalDisbursedGross / 100)
+    : Math.round(
+        posts
+          .filter((p) => p.reward?.status === "CREDITED")
+          .reduce((sum, p) => sum + (p.reward?.grossAmount || 0), 0) / 100
+      );
+
+  const remainingEditorPool = campaign.editorRewardPoolRemaining !== undefined
+    ? Math.round(campaign.editorRewardPoolRemaining / 100)
+    : Math.max(0, editorPoolTotal - paidNetMajor);
+
+  const remainingFund = campaign.campaignFundRemaining !== undefined
+    ? Math.round(campaign.campaignFundRemaining / 100)
+    : Math.max(0, campaignFundTotal - disbursedGrossMajor);
+
   const maxPerEditor =
     (campaign.maximumEditorEarning ??
-      (campaign.editorSlots ? Math.floor(editorPool / campaign.editorSlots) : editorPool)) / 100;
+      (campaign.editorSlots ? Math.floor(editorPoolTotal / campaign.editorSlots) : editorPoolTotal)) / 100;
   const earningRate = ((campaign.earningPer1000Views ?? 0) / 100).toFixed(2);
 
   const isDraft = campaign.status === "DRAFT";
@@ -655,20 +684,28 @@ export default function CreatorCampaignDetailPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
           <div className="rounded-xl border border-navy/10 bg-surface/50 p-3">
             <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-              Total Fund (100%)
+              Escrow Remaining (100%)
             </span>
             <span className="text-sm font-black text-navy">
-              ₹{campaignFund.toLocaleString("en-IN")}
+              ₹{remainingFund.toLocaleString("en-IN")}
+            </span>
+            <span className="text-[10px] text-neutral-400 block font-medium mt-0.5">
+              ₹{disbursedGrossMajor.toLocaleString("en-IN")} disbursed of ₹{campaignFundTotal.toLocaleString("en-IN")}
             </span>
           </div>
+
           <div className="rounded-xl border border-navy/10 bg-surface/50 p-3">
             <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-              Editor Pool (85%)
+              Editor Pool Remaining (85%)
             </span>
             <span className="text-sm font-black text-emerald-600">
-              ₹{editorPool.toLocaleString("en-IN")}
+              ₹{remainingEditorPool.toLocaleString("en-IN")}
+            </span>
+            <span className="text-[10px] text-emerald-700 block font-medium mt-0.5">
+              ₹{paidNetMajor.toLocaleString("en-IN")} paid of ₹{editorPoolTotal.toLocaleString("en-IN")}
             </span>
           </div>
+
           <div className="rounded-xl border border-navy/10 bg-surface/50 p-3">
             <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400">
               Slots (Approved / Max)
@@ -679,12 +716,19 @@ export default function CreatorCampaignDetailPage() {
                 ({campaign.remainingSlots ?? 0} left)
               </span>
             </span>
+            <span className="text-[10px] text-neutral-400 block font-medium mt-0.5">
+              Cap: ₹{maxPerEditor.toLocaleString("en-IN")} / editor
+            </span>
           </div>
+
           <div className="rounded-xl border border-navy/10 bg-surface/50 p-3">
             <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400">
               View Reward Rate
             </span>
             <span className="text-sm font-black text-neutral-800">₹{earningRate} / 1k</span>
+            <span className="text-[10px] text-neutral-400 block font-medium mt-0.5">
+              Verified view based
+            </span>
           </div>
         </div>
 

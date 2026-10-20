@@ -244,6 +244,25 @@ export const rewardService = {
       data: { status: RewardStatus.CREDITED, creditedAt: new Date() },
     });
 
+    // Record transparent escrow payout transaction on the creator's wallet
+    try {
+      const creatorWallet = await prisma.wallet.findUnique({ where: { userId: creatorId } });
+      if (creatorWallet) {
+        await prisma.walletTransaction.create({
+          data: {
+            walletId: creatorWallet.id,
+            type: "ADJUSTMENT",
+            amount: 0,
+            balance: creatorWallet.balance,
+            description: `Escrow payout released: ₹${(reward.netAmount / 100).toLocaleString("en-IN")} to @${reward.editor.username} for "${reward.campaign.title}"`,
+            referenceId: id,
+          },
+        });
+      }
+    } catch (creatorTxErr) {
+      console.error("Failed to record creator escrow disbursement transaction:", creatorTxErr);
+    }
+
     await notificationService.create(
       reward.editorId,
       "REWARD_CREDITED",

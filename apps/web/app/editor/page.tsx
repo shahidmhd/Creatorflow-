@@ -15,89 +15,68 @@ import {
   Video,
   ExternalLink,
   AlertCircle,
+  Eye,
+  Wallet,
+  Users,
 } from "lucide-react";
 import { api } from "@/app/api";
 import { StatusBadge } from "@/app/components";
 
-interface MySubmissionItem {
-  id: string;
-  campaignId: string;
-  contentUrl: string;
-  caption?: string;
-  notes?: string;
-  feedback?: string;
-  status: "DRAFT" | "SUBMITTED" | "CHANGES_REQUESTED" | "APPROVED" | "REJECTED";
-  campaign?: {
-    id: string;
-    title: string;
-    category?: string;
-    socialPlatform?: string;
-    rewardAmount?: number;
-    earningPer1000Views?: number;
-  };
-  createdAt?: string;
-  updatedAt?: string;
-  rawViews?: number;
-  payableViews?: number;
-  estimatedReward?: number;
+interface EditorStats {
+  walletBalance: number;
+  totalEarned: number;
+  pendingPayouts: number;
+  totalVerifiedViews: number;
+  activeSubmissions: number;
+  approvedSubmissions: number;
+  totalSubmissions: number;
+  approvalRate: number;
 }
 
 interface ActivityItem {
   id: string;
   message: string;
   campaignTitle?: string;
-  status: "APPROVED" | "SUBMITTED" | "CHANGES_REQUESTED" | "REJECTED" | "DRAFT";
+  status: string;
   amount?: number;
   time: string;
   contentUrl?: string;
 }
 
-const DEFAULT_ACTIVITIES: ActivityItem[] = [
-  {
-    id: "act-1",
-    message: "Your clip on 'New episode ft. XYZ' was approved — ₹765 credited",
-    campaignTitle: "New episode ft. XYZ",
-    status: "APPROVED",
-    amount: 765,
-    time: "Today, 10:41 AM",
-    contentUrl: "https://instagram.com/reel/sample1",
-  },
-  {
-    id: "act-2",
-    message: "Your clip on 'Summer Reels Challenge' was submitted — awaiting brand review",
-    campaignTitle: "Summer Reels Challenge",
-    status: "SUBMITTED",
-    amount: 1200,
-    time: "Yesterday, 4:20 PM",
-    contentUrl: "https://instagram.com/reel/sample2",
-  },
-  {
-    id: "act-3",
-    message: "Changes requested on 'Tech Unboxing Series' — please check brand feedback",
-    campaignTitle: "Tech Unboxing Series",
-    status: "CHANGES_REQUESTED",
-    amount: 850,
-    time: "3 days ago",
-  },
-  {
-    id: "act-4",
-    message: "Your clip on 'Gaming Montages' was approved — ₹1,440 credited",
-    campaignTitle: "Gaming Montages",
-    status: "APPROVED",
-    amount: 1440,
-    time: "Oct 14, 2026",
-    contentUrl: "https://instagram.com/reel/sample4",
-  },
-];
+interface FeaturedCampaign {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  socialPlatform: string;
+  thumbnail?: string | null;
+  campaignFund: number;
+  editorRewardPool: number;
+  editorSlots: number;
+  remainingSlots: number;
+  maximumEditorEarning: number;
+  earningPer1000Views: number;
+  creator?: {
+    id: string;
+    name: string;
+    username: string;
+    avatarUrl?: string | null;
+  };
+}
 
 export default function EditorOverviewPage() {
-  const [stats, setStats] = useState({
-    totalEarned: "₹10,110",
-    pendingPayouts: "₹612",
-    activeSubmissions: "2",
-    approvalRate: "86%",
+  const [stats, setStats] = useState<EditorStats>({
+    walletBalance: 0,
+    totalEarned: 0,
+    pendingPayouts: 0,
+    totalVerifiedViews: 0,
+    activeSubmissions: 0,
+    approvedSubmissions: 0,
+    totalSubmissions: 0,
+    approvalRate: 0,
   });
-  const [activities, setActivities] = useState<ActivityItem[]>(DEFAULT_ACTIVITIES);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [featured, setFeatured] = useState<FeaturedCampaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -105,62 +84,19 @@ export default function EditorOverviewPage() {
     setLoading(true);
     setError("");
     try {
-      const [subsRes, appsRes] = await Promise.all([
-        api<MySubmissionItem[]>("/submissions/mine").catch(() => [] as MySubmissionItem[]),
-        api<any[]>("/applications/mine").catch(() => []),
-      ]);
+      const res = await api<{
+        stats: EditorStats;
+        recentActivities: ActivityItem[];
+        featuredCampaign: FeaturedCampaign | null;
+      }>("/campaigns/editor/overview");
 
-      const subList = Array.isArray(subsRes) ? subsRes : [];
-      if (subList.length > 0) {
-        const approved = subList.filter((s) => s.status === "APPROVED");
-        const active = subList.filter((s) => s.status === "SUBMITTED");
-        const rejected = subList.filter((s) => s.status === "REJECTED");
-
-        const earnedPaise = approved.reduce(
-          (sum, s) => sum + (s.estimatedReward || 765),
-          0
-        );
-        const pendingPaise = active.reduce(
-          (sum, s) => sum + (s.estimatedReward || 612),
-          0
-        );
-        const decided = approved.length + rejected.length;
-        const rate = decided > 0 ? Math.round((approved.length / decided) * 100) : 86;
-
-        setStats({
-          totalEarned: `₹${(earnedPaise > 0 ? earnedPaise : 10110).toLocaleString("en-IN")}`,
-          pendingPayouts: `₹${(pendingPaise > 0 ? pendingPaise : 612).toLocaleString("en-IN")}`,
-          activeSubmissions: (active.length > 0 ? active.length : 2).toString(),
-          approvalRate: `${rate}%`,
-        });
-
-        // Map submissions to activities
-        const mappedActs: ActivityItem[] = subList.slice(0, 6).map((s) => {
-          let msg = `Submission for '${s.campaign?.title || "Campaign"}'`;
-          if (s.status === "APPROVED") {
-            msg = `Your clip on '${s.campaign?.title || "Campaign"}' was approved — ₹${s.estimatedReward || 765} credited`;
-          } else if (s.status === "CHANGES_REQUESTED") {
-            msg = `Changes requested on '${s.campaign?.title || "Campaign"}' — check feedback`;
-          } else if (s.status === "SUBMITTED") {
-            msg = `Your clip on '${s.campaign?.title || "Campaign"}' was submitted — awaiting review`;
-          }
-          return {
-            id: s.id,
-            message: msg,
-            campaignTitle: s.campaign?.title,
-            status: s.status,
-            amount: s.estimatedReward || 765,
-            time: s.createdAt ? new Date(s.createdAt).toLocaleDateString("en-IN") : "Recently",
-            contentUrl: s.contentUrl,
-          };
-        });
-
-        if (mappedActs.length > 0) {
-          setActivities(mappedActs);
-        }
+      if (res?.stats) {
+        setStats(res.stats);
       }
-    } catch {
-      setError("Failed to fetch latest editor metrics. Showing saved overview.");
+      setActivities(res?.recentActivities || []);
+      setFeatured(res?.featuredCampaign || null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load editor dashboard metrics.");
     } finally {
       setLoading(false);
     }
@@ -172,27 +108,31 @@ export default function EditorOverviewPage() {
 
   const cards = [
     {
-      title: "Total Earned",
-      value: stats.totalEarned,
-      subtitle: "Paid to your account",
-      Icon: IndianRupee,
+      title: "Available Virtual Balance",
+      value: `₹${stats.walletBalance.toLocaleString("en-IN")}`,
+      subtitle: "Credited 85% payouts ready for withdrawal",
+      Icon: Wallet,
+      actionHref: "/editor/earnings",
+      actionText: "View Wallet",
     },
     {
-      title: "Pending Payouts",
-      value: stats.pendingPayouts,
-      subtitle: "Settling in next batch",
-      Icon: Clock,
+      title: "Total Verified Views",
+      value: stats.totalVerifiedViews.toLocaleString("en-IN"),
+      subtitle: "Views delivered across verified clips",
+      Icon: Eye,
     },
     {
       title: "Active Submissions",
-      value: stats.activeSubmissions,
-      subtitle: "Awaiting campaign review",
+      value: stats.activeSubmissions.toString(),
+      subtitle: "In review or revisions requested",
       Icon: Video,
+      actionHref: "/editor/submissions",
+      actionText: "Track Clips",
     },
     {
       title: "Approval Rate",
-      value: stats.approvalRate,
-      subtitle: "Across your submissions",
+      value: stats.totalSubmissions > 0 ? `${stats.approvalRate}%` : "100%",
+      subtitle: `${stats.approvedSubmissions} of ${stats.totalSubmissions} submissions approved`,
       Icon: CheckCircle2,
     },
   ];
@@ -206,7 +146,7 @@ export default function EditorOverviewPage() {
             Editor Overview
           </h1>
           <p className="text-xs text-neutral-400 mt-0.5">
-            Apply to campaigns, track submitted content, and view your virtual wallet.
+            Track clip approvals, verified view rewards, and manage your virtual wallet.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -220,7 +160,7 @@ export default function EditorOverviewPage() {
           </button>
           <Link
             href="/editor/campaigns"
-            className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-xs font-bold text-white shadow-navy hover:opacity-95 transition"
+            className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-xs font-bold text-white hover:bg-navy/90 active:scale-[0.99] transition border border-navy/10"
           >
             <BriefcaseBusiness size={15} /> Browse Campaigns
           </Link>
@@ -233,48 +173,135 @@ export default function EditorOverviewPage() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════
-          STAT CARDS: 2 COLUMNS IN A ROW (Reviral Navy Theme)
-      ══════════════════════════════════════════════════ */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-16">
           <Loader2 className="h-7 w-7 animate-spin text-navy" />
         </div>
       ) : (
         <>
+          {/* ══════════════════════════════════════════════════
+              STAT CARDS: 2 COLUMNS IN A ROW (Reviral Navy Theme)
+          ══════════════════════════════════════════════════ */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {cards.map(({ title, value, subtitle, Icon }) => (
+            {cards.map(({ title, value, subtitle, Icon, actionHref, actionText }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm transition hover:shadow-md"
+                className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm transition hover:shadow-md flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-neutral-600">{title}</span>
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-navy-soft text-navy">
-                    <Icon size={16} />
-                  </span>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-neutral-600">{title}</span>
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-navy-soft text-navy">
+                      <Icon size={16} />
+                    </span>
+                  </div>
+                  <p className="mt-3 text-3xl font-black tracking-[-0.03em] text-neutral-900">
+                    {value}
+                  </p>
+                  <p className="mt-1 text-xs font-medium text-neutral-400">
+                    {subtitle}
+                  </p>
                 </div>
-                <p className="mt-3 text-3xl font-black tracking-[-0.03em] text-neutral-900">
-                  {value}
-                </p>
-                <p className="mt-1 text-xs font-medium text-neutral-400">
-                  {subtitle}
-                </p>
+                {actionHref && (
+                  <div className="pt-4 mt-2 border-t border-navy/5">
+                    <Link
+                      href={actionHref}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-navy hover:underline"
+                    >
+                      {actionText} <ArrowRight size={12} />
+                    </Link>
+                  </div>
+                )}
               </div>
             ))}
           </div>
 
           {/* ══════════════════════════════════════════════════
-              RECENT ACTIVITY
+              FEATURED CAMPAIGN CALLOUT (Real Database Record)
+          ══════════════════════════════════════════════════ */}
+          {featured ? (
+            <div className="rounded-3xl border border-navy/10 bg-gradient-to-r from-[#0b1626] via-[#132a4a] to-[#0d213a] p-6 sm:p-7 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2.5 max-w-xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/90 backdrop-blur-xs">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Featured Opportunity</span>
+                  <span className="text-white/40">•</span>
+                  <span>{featured.category}</span>
+                  <span className="text-white/40">•</span>
+                  <span>{featured.socialPlatform}</span>
+                </div>
+
+                <h2 className="text-2xl font-black tracking-tight text-white">
+                  {featured.title}
+                </h2>
+
+                <p className="text-xs text-white/70 line-clamp-2 leading-relaxed">
+                  {featured.description || "Produce high-converting vertical edits matching brand brief specifications."}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                  <span className="font-black text-emerald-300">
+                    Earn up to ₹{featured.maximumEditorEarning.toLocaleString("en-IN")} / editor
+                  </span>
+                  <span className="text-white/30">•</span>
+                  <span className="font-semibold text-white/80">
+                    ₹{featured.earningPer1000Views.toLocaleString("en-IN")} / 1k verified views
+                  </span>
+                  <span className="text-white/30">•</span>
+                  <span className="font-semibold text-white/80">
+                    {featured.remainingSlots} of {featured.editorSlots} slots left
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex sm:flex-col items-center sm:items-end justify-between gap-3 shrink-0">
+                <Link
+                  href={`/editor/campaigns/${featured.id}`}
+                  className="rounded-full bg-white px-5 py-2.5 text-xs font-black text-navy hover:bg-neutral-100 transition shadow-sm inline-flex items-center gap-1.5"
+                >
+                  View Brief & Apply <ArrowRight size={13} />
+                </Link>
+                <Link
+                  href="/editor/campaigns"
+                  className="text-xs font-bold text-white/70 hover:text-white underline"
+                >
+                  Browse all campaigns
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-navy/10 bg-navy-soft/30 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Sparkles size={16} className="text-navy" />
+                  <h3 className="font-bold text-sm text-neutral-900">
+                    Looking for high-payout brand briefs?
+                  </h3>
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Browse open campaigns, claim approved slots, and earn 85% payouts on every 1,000 verified views.
+                </p>
+              </div>
+              <Link
+                href="/editor/campaigns"
+                className="inline-flex items-center gap-1.5 rounded-full bg-navy px-5 py-2.5 text-xs font-bold text-white hover:bg-navy/90 transition shrink-0"
+              >
+                Browse Campaigns <ArrowRight size={13} />
+              </Link>
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════
+              RECENT ACTIVITY TIMELINE (Real Database Events)
           ══════════════════════════════════════════════════ */}
           <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-lg font-black tracking-[-0.03em] text-neutral-900">
-                  Recent activity
+                  Recent Activity
                 </h2>
                 <p className="text-xs font-medium text-neutral-400 mt-0.5">
-                  Updates on your clips and earnings.
+                  Live updates on clip submissions, brand approvals, and credited rewards.
                 </p>
               </div>
               <Link
@@ -286,15 +313,15 @@ export default function EditorOverviewPage() {
             </div>
 
             {activities.length === 0 ? (
-              <div className="py-8 text-center text-xs text-neutral-400">
-                No recent activity recorded yet. Apply to campaigns to get started!
+              <div className="py-10 text-center text-xs text-neutral-400">
+                No activity recorded yet. Apply to your first campaign to get started!
               </div>
             ) : (
               <div className="divide-y divide-neutral-100">
                 {activities.map((item) => (
                   <div
                     key={item.id}
-                    className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                    className="py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-neutral-50/50 px-2 rounded-xl transition"
                   >
                     <div>
                       <p className="font-bold text-sm text-neutral-900">
@@ -313,7 +340,7 @@ export default function EditorOverviewPage() {
                               rel="noreferrer"
                               className="text-xs font-medium text-navy hover:underline inline-flex items-center gap-1"
                             >
-                              View clip <ExternalLink size={11} />
+                              View link <ExternalLink size={11} />
                             </a>
                           </>
                         )}
@@ -327,29 +354,6 @@ export default function EditorOverviewPage() {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* ══════════════════════════════════════════════════
-              FIND MORE CAMPAIGNS CALLOUT
-          ══════════════════════════════════════════════════ */}
-          <div className="rounded-2xl border border-navy/10 bg-gradient-to-r from-navy-soft via-white to-navy-soft/40 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Sparkles size={16} className="text-navy" />
-                <h3 className="font-bold text-sm text-neutral-900">
-                  Ready to edit more viral content?
-                </h3>
-              </div>
-              <p className="text-xs text-neutral-500 mt-1">
-                Browse open brand briefs, claim editor slots, and earn up to ₹12,000 per campaign.
-              </p>
-            </div>
-            <Link
-              href="/editor/campaigns"
-              className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-bold text-white shadow-sm hover:opacity-95 transition shrink-0"
-            >
-              Browse Campaigns <ArrowRight size={13} />
-            </Link>
           </div>
         </>
       )}

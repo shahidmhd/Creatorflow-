@@ -149,12 +149,13 @@ export default function EditorCampaignDetailPage() {
   }
 
   const fundMajor = Math.round((campaign.campaignFund || campaign.rewardAmount || 100000) / 100);
+  const poolMajor = Math.round((campaign.editorRewardPool || Math.floor(fundMajor * 85 * 100)) / 100);
   const totalSlots = campaign.editorSlots || 1;
   const approvedCount = campaign.approvedEditorsCount || 0;
   const remainingSlots = campaign.remainingSlots !== undefined ? campaign.remainingSlots : Math.max(0, totalSlots - approvedCount);
 
   const maxEarningMajor = Math.floor(
-    (campaign.maximumEditorEarning || Math.floor((fundMajor * 100 * 0.85) / totalSlots)) / 100
+    (campaign.maximumEditorEarning || Math.floor((poolMajor * 100) / totalSlots)) / 100
   );
 
   const rateVal = campaign.earningPer1000Views
@@ -225,8 +226,8 @@ export default function EditorCampaignDetailPage() {
           {/* Slot & View Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl bg-surface p-4 text-xs font-medium">
             <div>
-              <span className="block text-[10px] font-bold uppercase text-neutral-400">Total Campaign Fund</span>
-              <span className="text-sm font-black text-neutral-900">₹{fundMajor.toLocaleString("en-IN")}</span>
+              <span className="block text-[10px] font-bold uppercase text-neutral-400">Editor Pool (85%)</span>
+              <span className="text-sm font-black text-neutral-900">₹{poolMajor.toLocaleString("en-IN")}</span>
             </div>
             <div>
               <span className="block text-[10px] font-bold uppercase text-neutral-400">Editor Slots</span>
@@ -341,7 +342,7 @@ export default function EditorCampaignDetailPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 rounded-full bg-navy px-6 py-2.5 text-sm font-bold text-white shadow-navy hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="inline-flex items-center gap-2 rounded-full bg-navy px-6 py-2.5 text-sm font-bold text-white hover:bg-navy/90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   {submitting ? (
                     <>

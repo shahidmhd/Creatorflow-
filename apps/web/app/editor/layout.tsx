@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BriefcaseBusiness, LayoutDashboard, LogOut, User, Wallet, CheckCircle } from "lucide-react";
 import { getAuthSession, clearAuthData } from "../api";
+import { LogoBrand } from "../components";
 
 const navItems = [
   { label: "Overview", href: "/editor", Icon: LayoutDashboard },
-  { label: "Find Campaigns", href: "/editor/campaigns", Icon: BriefcaseBusiness },
+  { label: "Browse Campaigns", href: "/editor/campaigns", Icon: BriefcaseBusiness },
   { label: "My Submissions", href: "/editor/submissions", Icon: CheckCircle },
-  { label: "Wallet & Earnings", href: "/editor/earnings", Icon: Wallet },
+  { label: "Earnings", href: "/editor/earnings", Icon: Wallet },
   { label: "Profile", href: "/editor/profile", Icon: User },
 ];
 
@@ -45,12 +46,9 @@ export default function EditorLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen bg-surface text-neutral-900">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-black/5 bg-white px-5 py-7 lg:flex">
-        <Link href="/editor" className="flex items-center gap-3 text-left">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-navy text-sm font-black text-white">CF</span>
-          <span className="text-xl font-black tracking-[-0.08em]">CREATORFLOW</span>
-        </Link>
-        <p className="mb-3 mt-10 px-3 text-xs font-bold uppercase tracking-[.16em] text-neutral-400">Editor workspace</p>
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-navy/10 bg-white px-5 py-7 lg:flex">
+        <LogoBrand href="/editor" />
+        <p className="mb-3 mt-8 px-3 text-xs font-bold uppercase tracking-[.18em] text-neutral-400">Clipper workspace</p>
         <nav className="space-y-1">
           {navItems.map(({ label, href, Icon }) => {
             const active = href === "/editor" ? pathname === href : pathname.startsWith(href);
@@ -78,15 +76,14 @@ export default function EditorLayout({ children }: { children: React.ReactNode }
       </aside>
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-black/5 bg-white/95 px-5 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-navy/10 bg-white/95 px-5 backdrop-blur md:px-8">
           <div className="flex items-center gap-2 lg:hidden">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-black text-white">CF</span>
-            <span className="font-black tracking-[-0.08em]">CREATORFLOW</span>
+            <LogoBrand href="/editor" />
           </div>
-          <span className="hidden text-sm font-semibold text-neutral-500 lg:block">Editor Dashboard</span>
+          <span className="hidden text-sm font-medium text-neutral-500 lg:block">Clipper workspace</span>
           <button
             onClick={logout}
-            className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1.5 text-xs font-bold text-neutral-600"
+            className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1.5 text-xs font-bold text-neutral-600 hover:bg-neutral-50"
           >
             <LogOut size={14} /> Log out
           </button>

@@ -52,6 +52,19 @@ adminRoutes.get("/campaigns", async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+const updateCampaignStatusSchema = z.object({
+  status: z.enum(["DRAFT", "PUBLISHED", "PAUSED", "COMPLETED", "CANCELLED"]),
+});
+
+/** PATCH /api/v1/admin/campaigns/:id/status */
+adminRoutes.patch("/campaigns/:id/status", validate(idSchema, "params"), validate(updateCampaignStatusSchema), async (req, res, next) => {
+  try {
+    const { status } = req.body as { status: any };
+    const campaign = await adminService.updateCampaignStatus(req.params.id, status);
+    success(res, campaign);
+  } catch (err) { next(err); }
+});
+
 /** GET /api/v1/admin/rewards */
 adminRoutes.get("/rewards", async (req, res, next) => {
   try {

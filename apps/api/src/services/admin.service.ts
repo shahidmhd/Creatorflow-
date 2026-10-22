@@ -1,16 +1,78 @@
 import { prisma } from "../repositories/prisma";
 import { config } from "../config";
 import { NotFoundError } from "../errors";
+import { CampaignStatus } from "@prisma/client";
+import { auditLogService } from "./audit-log.service";
 
 export const adminService = {
   async getStats() {
-    const [users, campaigns, rewards, wallets] = await Promise.all([
+    const [
+      users,
+      usersByRole,
+      campaigns,
+      rewards,
+      wallets,
+      campaignFundSum,
+      platformFeeSum,
+      disbursedSum,
+      totalSubmissions,
+      totalPublishedPosts,
+      pendingReports,
+      recentCampaigns,
+      recentLogs,
+    ] = await Promise.all([
       prisma.user.count(),
+      prisma.user.groupBy({ by: ["role"], _count: true }),
       prisma.campaign.groupBy({ by: ["status"], _count: true }),
       prisma.reward.groupBy({ by: ["status"], _count: true }),
       prisma.wallet.aggregate({ _sum: { balance: true } }),
+      prisma.campaign.aggregate({ _sum: { campaignFund: true } }),
+      prisma.reward.aggregate({ _sum: { platformFee: true }, where: { status: "CREDITED" } }),
+      prisma.reward.aggregate({ _sum: { netAmount: true }, where: { status: "CREDITED" } }),
+      prisma.contentSubmission.count(),
+      prisma.publishedPost.count(),
+      prisma.report.count({ where: { resolved: false } }),
+      prisma.campaign.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        include: {
+          creator: { select: { id: true, name: true, username: true } },
+          _count: { select: { applications: true, submissions: true } },
+        },
+      }),
+      prisma.auditLog.findMany({
+        take: 6,
+        orderBy: { createdAt: "desc" },
+        include: { actor: { select: { id: true, name: true, role: true } } },
+      }),
     ]);
-    return { users, campaigns, rewards, totalWalletBalance: wallets._sum.balance ?? 0 };
+
+    const activeCampaignsCount = campaigns.find((c) => c.status === "PUBLISHED")?._count ?? 0;
+    const completedCampaignsCount = campaigns.find((c) => c.status === "COMPLETED")?._count ?? 0;
+    const pausedCampaignsCount = campaigns.find((c) => c.status === "PAUSED")?._count ?? 0;
+    const draftCampaignsCount = campaigns.find((c) => c.status === "DRAFT")?._count ?? 0;
+    const totalCampaignsCount = campaigns.reduce((acc, c) => acc + c._count, 0);
+
+    return {
+      users,
+      usersByRole,
+      campaigns,
+      rewards,
+      totalCampaigns: totalCampaignsCount,
+      activeCampaigns: activeCampaignsCount,
+      completedCampaigns: completedCampaignsCount,
+      pausedCampaigns: pausedCampaignsCount,
+      draftCampaigns: draftCampaignsCount,
+      totalWalletBalance: wallets._sum.balance ?? 0,
+      totalGMV: campaignFundSum._sum.campaignFund ?? 0,
+      totalPlatformFeesEarned: platformFeeSum._sum.platformFee ?? 0,
+      totalDisbursedToEditors: disbursedSum._sum.netAmount ?? 0,
+      totalSubmissions,
+      totalPublishedPosts,
+      pendingReports,
+      recentCampaigns,
+      recentLogs,
+    };
   },
 
   async getUsers(page = 1, limit = 20, role?: string) {
@@ -37,7 +99,11 @@ export const adminService = {
   async getAllCampaigns(page = 1, limit = 20) {
     const [campaigns, total] = await Promise.all([
       prisma.campaign.findMany({
-        include: { creator: { select: { id: true, name: true } }, _count: { select: { applications: true, submissions: true } } },
+        include: {
+          creator: { select: { id: true, name: true, username: true, email: true } },
+          _count: { select: { applications: true, submissions: true } },
+          rewards: { select: { grossAmount: true, netAmount: true, platformFee: true, status: true } },
+        },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
@@ -45,6 +111,21 @@ export const adminService = {
       prisma.campaign.count(),
     ]);
     return { campaigns, total, page, limit };
+  },
+
+  async updateCampaignStatus(campaignId: string, status: CampaignStatus) {
+    const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
+    if (!campaign) throw new NotFoundError("Campaign");
+    const updated = await prisma.campaign.update({
+      where: { id: campaignId },
+      data: { status },
+      include: {
+        creator: { select: { id: true, name: true } },
+        _count: { select: { applications: true, submissions: true } },
+      },
+    });
+    await auditLogService.log(null, "ADMIN_CAMPAIGN_STATUS_CHANGED", "Campaign", campaignId, { status: campaign.status }, { status });
+    return updated;
   },
 
   async getAllRewards(page = 1, limit = 20) {

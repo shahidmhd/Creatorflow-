@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BriefcaseBusiness, LayoutDashboard, LogOut, Settings, ShieldAlert, Users, Wallet } from "lucide-react";
+import { AlertTriangle, BriefcaseBusiness, History, LayoutDashboard, LogOut, Settings, ShieldAlert, Users } from "lucide-react";
 import { getAuthSession, clearAuthData } from "../api";
 
 const navItems = [
   { label: "Overview", href: "/admin", Icon: LayoutDashboard },
-  { label: "Users", href: "/admin/users", Icon: Users },
   { label: "Campaigns", href: "/admin/campaigns", Icon: BriefcaseBusiness },
+  { label: "Users", href: "/admin/users", Icon: Users },
+  { label: "Activity Logs", href: "/admin/audit-logs", Icon: History },
+  { label: "Reports & Flags", href: "/admin/reports", Icon: AlertTriangle },
   { label: "Platform Fees", href: "/admin/settings", Icon: Settings },
   { label: "Admin Profile", href: "/admin/profile", Icon: ShieldAlert },
 ];

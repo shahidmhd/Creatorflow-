@@ -1,8 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Moon, Sun, Menu, X, ArrowRight, Sparkles, Instagram, Youtube, Users, CheckCircle2, TrendingUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Moon,
+  Sun,
+  Menu,
+  X,
+  ChevronDown,
+  Pencil,
+  LogIn,
+  Scissors,
+  Sparkles,
+  Instagram,
+  Youtube,
+  Users,
+  CheckCircle2,
+  TrendingUp,
+} from "lucide-react";
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(false);
@@ -19,7 +34,15 @@ export function ThemeToggle() {
     localStorage.setItem("reviral-theme", themeVal);
     localStorage.setItem("creatorflow-theme", themeVal);
   }
-  return <button onClick={toggle} aria-label="Toggle dark mode" className="icon-button">{dark ? <Sun size={17} /> : <Moon size={17} />}</button>;
+  return (
+    <button
+      onClick={toggle}
+      aria-label="Toggle dark mode"
+      className="grid h-10 w-10 place-items-center rounded-full border border-navy/15 bg-white text-navy shadow-sm transition hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-sky-300 dark:hover:bg-white/10"
+    >
+      {dark ? <Sun size={17} /> : <Moon size={17} />}
+    </button>
+  );
 }
 
 export function LogoBrand({ href = "/" }: { href?: string }) {
@@ -33,28 +56,226 @@ export function LogoBrand({ href = "/" }: { href?: string }) {
 
 export function PublicNav() {
   const [open, setOpen] = useState(false);
+  const [brandOpen, setBrandOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const brandRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+
   const links = [["How it works", "/"], ["Pricing", "/"]];
 
-  return <header className="sticky top-0 z-40 border-b border-navy/10 bg-paper/90 backdrop-blur">
-    <div className="container flex h-20 items-center justify-between">
-      <LogoBrand />
-      <nav className="hidden items-center gap-7 text-sm font-semibold text-neutral-700 xl:flex">
-        {links.map(([label, href]) => <Link className="transition hover:text-navy" key={label} href={href}>{label}</Link>)}
-      </nav>
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
-        <Link href="/?auth=creator-login" className="hidden rounded-full border border-navy/20 bg-white px-4 py-2 text-sm font-semibold text-navy sm:block">Creator sign in</Link>
-        <Link href="/?auth=creator-create" className="rounded-full bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy/90 active:scale-[0.99] transition border border-navy/10">Start a campaign <ArrowRight className="ml-1 inline" size={14} /></Link>
-        <Link href="/?auth=editor-create" className="hidden rounded-full border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy xl:block">Editor sign in / Join</Link>
-        <button className="icon-button shrink-0 xl:hidden" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>{open ? <X /> : <Menu />}</button>
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (brandRef.current && !brandRef.current.contains(event.target as Node)) {
+        setBrandOpen(false);
+      }
+      if (editorRef.current && !editorRef.current.contains(event.target as Node)) {
+        setEditorOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function triggerAuth(flow: "creator" | "editor" | "admin", mode: "login" | "create" = "login") {
+    if (typeof window !== "undefined") {
+      const authParam = flow === "admin" ? "admin-login" : flow === "editor" ? (mode === "login" ? "editor-login" : "editor-create") : (mode === "login" ? "brand-login" : "brand-create");
+      if (window.location.pathname !== "/") {
+        window.location.href = `/?auth=${authParam}`;
+        return;
+      }
+      const newUrl = `${window.location.pathname}?auth=${authParam}`;
+      window.history.pushState(null, "", newUrl);
+      const event = new CustomEvent("open-auth", { detail: { flow, mode } });
+      window.dispatchEvent(event);
+    }
+  }
+
+  return (
+    <header className="sticky top-0 z-40 border-b border-navy/10 bg-paper/90 backdrop-blur">
+      <div className="container flex h-20 items-center justify-between">
+        <LogoBrand />
+        <nav className="hidden items-center gap-7 text-sm font-semibold text-neutral-700 md:flex">
+          {links.map(([label, href]) => (
+            <Link className="transition hover:text-navy" key={label} href={href}>
+              {label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+
+          {/* Brand Sign In */}
+          <div className="relative hidden sm:block" ref={brandRef}>
+            <button
+              onClick={() => {
+                setBrandOpen(!brandOpen);
+                setEditorOpen(false);
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-white px-4 py-2 text-sm font-semibold text-navy shadow-sm transition hover:border-navy/40 hover:bg-neutral-50 active:scale-[0.99] dark:border-white/15 dark:bg-white/5 dark:text-white"
+              aria-expanded={brandOpen}
+            >
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#64748b] text-[11px] font-black text-white">
+                B
+              </span>
+              <span>Brand Sign In</span>
+              <ChevronDown
+                size={14}
+                className={`text-neutral-500 transition-transform duration-200 ${brandOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {brandOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl border border-navy/10 bg-white p-1.5 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-[#0c1829] z-50">
+                <button
+                  onClick={() => {
+                    setBrandOpen(false);
+                    triggerAuth("creator", "login");
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-neutral-800 transition hover:bg-navy-soft/60 hover:text-navy dark:text-neutral-200 dark:hover:bg-white/5"
+                >
+                  <LogIn size={15} className="text-navy dark:text-sky-400 shrink-0" />
+                  <div>
+                    <div className="font-bold">Sign In</div>
+                    <div className="text-[11px] font-normal text-neutral-500">Access brand portal</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    setBrandOpen(false);
+                    triggerAuth("creator", "create");
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-neutral-800 transition hover:bg-navy-soft/60 hover:text-navy dark:text-neutral-200 dark:hover:bg-white/5"
+                >
+                  <Sparkles size={15} className="text-navy dark:text-sky-400 shrink-0" />
+                  <div>
+                    <div className="font-bold">Create Account</div>
+                    <div className="text-[11px] font-normal text-neutral-500">Launch campaigns & pay views</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Editor Sign In */}
+          <div className="relative hidden sm:block" ref={editorRef}>
+            <button
+              onClick={() => {
+                setEditorOpen(!editorOpen);
+                setBrandOpen(false);
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy/90 active:scale-[0.99]"
+              aria-expanded={editorOpen}
+            >
+              <Pencil size={13} className="shrink-0 text-white" />
+              <span>Editor Sign In</span>
+              <ChevronDown
+                size={14}
+                className={`text-white/80 transition-transform duration-200 ${editorOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {editorOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl border border-navy/10 bg-white p-1.5 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-[#0c1829] z-50">
+                <button
+                  onClick={() => {
+                    setEditorOpen(false);
+                    triggerAuth("editor", "login");
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-neutral-800 transition hover:bg-navy-soft/60 hover:text-navy dark:text-neutral-200 dark:hover:bg-white/5"
+                >
+                  <LogIn size={15} className="text-navy dark:text-sky-400 shrink-0" />
+                  <div>
+                    <div className="font-bold">Sign In</div>
+                    <div className="text-[11px] font-normal text-neutral-500">Access editor workspace</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    setEditorOpen(false);
+                    triggerAuth("editor", "create");
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-neutral-800 transition hover:bg-navy-soft/60 hover:text-navy dark:text-neutral-200 dark:hover:bg-white/5"
+                >
+                  <Scissors size={15} className="text-navy dark:text-sky-400 shrink-0" />
+                  <div>
+                    <div className="font-bold">Join as Editor</div>
+                    <div className="text-[11px] font-normal text-neutral-500">Edit clips & earn rewards</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            className="icon-button shrink-0 md:hidden"
+            onClick={() => setOpen(!open)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+          >
+            {open ? <X /> : <Menu />}
+          </button>
+        </div>
       </div>
-    </div>
-    {open && <nav className="container grid gap-3 border-t border-navy/10 py-4 xl:hidden">
-      {links.map(([label, href]) => <Link onClick={() => setOpen(false)} className="py-2 font-semibold" key={label} href={href}>{label}</Link>)}
-      <Link onClick={() => setOpen(false)} href="/?auth=creator-create" className="rounded-full bg-navy px-4 py-3 text-center text-sm font-semibold text-white">Start a campaign</Link>
-      <Link onClick={() => setOpen(false)} href="/?auth=editor-create" className="rounded-full border border-navy/20 bg-white px-4 py-3 text-center text-sm font-semibold text-navy">Editor sign in / Join</Link>
-    </nav>}
-  </header>;
+      {open && (
+        <nav className="container grid gap-3 border-t border-navy/10 py-5 md:hidden">
+          {links.map(([label, href]) => (
+            <Link onClick={() => setOpen(false)} className="py-2 text-base font-semibold" key={label} href={href}>
+              {label}
+            </Link>
+          ))}
+          <div className="my-1 border-t border-navy/10" />
+          <div className="grid gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Brand</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  triggerAuth("creator", "login");
+                }}
+                className="inline-flex items-center justify-center gap-1.5 rounded-full border border-navy/20 bg-white py-2.5 text-xs font-bold text-navy"
+              >
+                <span className="grid h-4 w-4 place-items-center rounded-full bg-[#64748b] text-[9px] text-white">B</span>
+                Sign In
+              </button>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  triggerAuth("creator", "create");
+                }}
+                className="inline-flex items-center justify-center rounded-full border border-navy/20 bg-white py-2.5 text-xs font-bold text-navy"
+              >
+                Create Account
+              </button>
+            </div>
+          </div>
+          <div className="grid gap-2 pt-1">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Editor</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  triggerAuth("editor", "login");
+                }}
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-navy py-2.5 text-xs font-bold text-white"
+              >
+                <Pencil size={12} />
+                Sign In
+              </button>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  triggerAuth("editor", "create");
+                }}
+                className="inline-flex items-center justify-center rounded-full bg-navy/90 py-2.5 text-xs font-bold text-white"
+              >
+                Join as Editor
+              </button>
+            </div>
+          </div>
+        </nav>
+      )}
+    </header>
+  );
 }
 
 export function Footer() {

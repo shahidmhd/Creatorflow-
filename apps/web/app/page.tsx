@@ -139,12 +139,12 @@ function HomeContent() {
     auth === "editor-login" || auth === "editor-create" ||
     auth === "brand-login" || auth === "brand-create" ||
     auth === "clipper-login" || auth === "clipper-create" ||
-    auth === "admin-login";
+    auth === "admin-login" || auth === "login" || auth === "signin";
 
   const initialFlow = getFlowFromParam(auth);
   const [authOpen, setAuthOpen] = useState(isAuthFlow);
   const [authMode, setAuthMode] = useState<"create" | "login">(
-    initialFlow === "admin" ? "login" : auth?.endsWith("-login") ? "login" : "create"
+    initialFlow === "admin" ? "login" : auth?.endsWith("-login") || auth === "login" || auth === "signin" ? "login" : "create"
   );
   const [authFlow, setAuthFlow] = useState<"creator" | "editor" | "admin">(initialFlow);
   const [form, setForm] = useState({ name: "", email: "", username: "", password: "" });
@@ -153,10 +153,22 @@ function HomeContent() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
+    const handleOpenAuth = (e: Event) => {
+      const customEvent = e as CustomEvent<{ mode?: "create" | "login"; flow?: "creator" | "editor" | "admin" }>;
+      if (customEvent.detail?.mode) setAuthMode(customEvent.detail.mode);
+      if (customEvent.detail?.flow) setAuthFlow(customEvent.detail.flow);
+      setAuthNotice("");
+      setAuthOpen(true);
+    };
+    window.addEventListener("open-auth", handleOpenAuth);
+    return () => window.removeEventListener("open-auth", handleOpenAuth);
+  }, []);
+
+  useEffect(() => {
     if (isAuthFlow && auth) {
       const flow = getFlowFromParam(auth);
       setAuthFlow(flow);
-      setAuthMode(flow === "admin" ? "login" : auth.endsWith("-login") ? "login" : "create");
+      setAuthMode(flow === "admin" ? "login" : auth.endsWith("-login") || auth === "login" || auth === "signin" ? "login" : "create");
       setAuthOpen(true);
     }
   }, [auth, isAuthFlow]);
@@ -414,7 +426,7 @@ function HomeContent() {
 
             {/* Dual CTA cards */}
             <div className="mt-14 grid gap-5 md:grid-cols-2">
-              <div className="rounded-2xl bg-navy p-8 text-white">
+              <div id="for-brands" className="rounded-2xl bg-navy p-8 text-white scroll-mt-28">
                 <p className="text-[10px] font-black uppercase tracking-[.2em] text-white/50 mb-4">For brands and podcasters</p>
                 <h3 className="text-2xl font-black tracking-[-0.04em] mb-3">
                   Pay only for views that actually happen.
@@ -430,8 +442,9 @@ function HomeContent() {
                   Start a campaign <ArrowRight size={14} />
                 </Link>
               </div>
-              <div className="rounded-2xl border border-navy/15 bg-white p-8">
-                <p className="text-[10px] font-black uppercase tracking-[.2em] text-navy/50 mb-4">For editors</p>
+              <div id="for-creators" className="rounded-2xl border border-navy/15 bg-white p-8 scroll-mt-28 relative">
+                <span id="for-editors" className="absolute -top-28 left-0 pointer-events-none" />
+                <p className="text-[10px] font-black uppercase tracking-[.2em] text-navy/50 mb-4">For creators & editors</p>
                 <h3 className="text-2xl font-black tracking-[-0.04em] text-neutral-900 mb-3">
                   Turn your editing skill into steady income.
                 </h3>
@@ -490,34 +503,54 @@ function HomeContent() {
           AUTH MODAL
       ══════════════════════════════════════════════════ */}
       {authOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setAuthOpen(false);
+              if (typeof window !== "undefined" && window.location.search) {
+                window.history.replaceState(null, "", window.location.pathname);
+              }
+            }
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
+        >
           <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl ring-1 ring-navy/10">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[.2em] text-navy">Reviral access</p>
-                <h3 className="mt-2 text-2xl font-black tracking-[-0.05em]">
+                <h3 className="mt-1 text-2xl font-black tracking-[-0.05em] text-neutral-900">
                   {authFlow === "admin" ? "Admin" : authFlow === "editor" ? "Editor" : "Brand"}{" "}
-                  {authMode === "create" ? "account" : "login"}
+                  {authMode === "create" ? "Sign up" : "Sign in"}
                 </h3>
               </div>
-              <button onClick={() => setAuthOpen(false)} className="rounded-full bg-navy-soft p-2 text-navy">
+              <button
+                onClick={() => {
+                  setAuthOpen(false);
+                  if (typeof window !== "undefined" && window.location.search) {
+                    window.history.replaceState(null, "", window.location.pathname);
+                  }
+                }}
+                className="rounded-full bg-navy-soft p-2 text-navy hover:bg-navy-soft/80 transition"
+              >
                 <X size={16} />
               </button>
             </div>
 
             {authFlow !== "admin" && (
-              <div className="mb-5 flex rounded-full bg-navy-soft p-1 text-sm font-semibold text-neutral-700">
+              <div className="mb-5 flex rounded-full bg-navy-soft p-1 text-xs font-semibold text-neutral-700">
                 <button
-                  className={`flex-1 rounded-full px-3 py-2 ${authMode === "create" ? "bg-white text-navy shadow" : ""}`}
+                  type="button"
+                  className={`flex-1 rounded-full px-3 py-1.5 transition-all ${authMode === "login" ? "bg-white text-navy shadow font-bold" : "hover:text-navy"}`}
+                  onClick={() => { setAuthMode("login"); setAuthNotice(""); }}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  className={`flex-1 rounded-full px-3 py-1.5 transition-all ${authMode === "create" ? "bg-white text-navy shadow font-bold" : "hover:text-navy"}`}
                   onClick={() => { setAuthMode("create"); setAuthNotice(""); }}
                 >
                   Create account
-                </button>
-                <button
-                  className={`flex-1 rounded-full px-3 py-2 ${authMode === "login" ? "bg-white text-navy shadow" : ""}`}
-                  onClick={() => { setAuthMode("login"); setAuthNotice(""); }}
-                >
-                  Login
                 </button>
               </div>
             )}

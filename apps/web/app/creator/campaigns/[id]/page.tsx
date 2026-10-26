@@ -1080,15 +1080,17 @@ export default function CreatorCampaignDetailPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">
-                Required Hashtags
-              </h3>
-              <p className="text-xs font-bold text-navy">
-                {campaign.hashtagRequirements || "None specified"}
-              </p>
-            </div>
-            <div>
+            {campaign.hashtagRequirements && (
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">
+                  Required Hashtags
+                </h3>
+                <p className="text-xs font-bold text-navy">
+                  {campaign.hashtagRequirements}
+                </p>
+              </div>
+            )}
+            <div className={campaign.hashtagRequirements ? "" : "sm:col-span-2"}>
               <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">
                 Required Mentions
               </h3>
@@ -1246,32 +1248,17 @@ export default function CreatorCampaignDetailPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1">
-                    Required Hashtags
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.hashtagRequirements}
-                    onChange={(e) => setEditForm({ ...editForm, hashtagRequirements: e.target.value })}
-                    placeholder="#brand #product"
-                    className="w-full rounded-xl border border-navy/15 bg-surface px-4 py-2 text-xs font-medium text-neutral-900 outline-none focus:border-navy"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1">
-                    Required Mentions
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.mentionRequirements}
-                    onChange={(e) => setEditForm({ ...editForm, mentionRequirements: e.target.value })}
-                    placeholder="@brandname"
-                    className="w-full rounded-xl border border-navy/15 bg-surface px-4 py-2 text-xs font-medium text-neutral-900 outline-none focus:border-navy"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1">
+                  Required Mentions
+                </label>
+                <input
+                  type="text"
+                  value={editForm.mentionRequirements}
+                  onChange={(e) => setEditForm({ ...editForm, mentionRequirements: e.target.value })}
+                  placeholder="@brandname"
+                  className="w-full rounded-xl border border-navy/15 bg-surface px-4 py-2 text-xs font-medium text-neutral-900 outline-none focus:border-navy"
+                />
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-navy/10">

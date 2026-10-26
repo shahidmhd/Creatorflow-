@@ -60,7 +60,6 @@ export default function NewCampaignPage() {
     minimumViews: 10000,
     deadline: "",
     mentionRequirements: "",
-    hashtagRequirements: "",
     creativeGuidelines: "",
   });
 
@@ -229,7 +228,6 @@ export default function NewCampaignPage() {
 
         deadline: new Date(form.deadline).toISOString(),
         mentionRequirements: form.mentionRequirements.trim() || undefined,
-        hashtagRequirements: form.hashtagRequirements.trim() || undefined,
         contentRequirements: form.creativeGuidelines.trim() || undefined,
       };
 
@@ -678,32 +676,17 @@ export default function NewCampaignPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1">
-                Required Mentions
-              </label>
-              <input
-                value={form.mentionRequirements}
-                onChange={(e) => setForm({ ...form, mentionRequirements: e.target.value })}
-                placeholder="e.g. @brandaccount @creatorflow"
-                className="w-full rounded-xl border border-navy/10 bg-surface px-4 py-2.5 text-sm outline-none focus:border-navy"
-              />
-              <span className="text-[10px] text-neutral-400 mt-1 block">Account handles editors must tag in captions</span>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1">
-                Required Hashtags
-              </label>
-              <input
-                value={form.hashtagRequirements}
-                onChange={(e) => setForm({ ...form, hashtagRequirements: e.target.value })}
-                placeholder="e.g. #BrandName #Ad #CreatorFlow"
-                className="w-full rounded-xl border border-navy/10 bg-surface px-4 py-2.5 text-sm outline-none focus:border-navy"
-              />
-              <span className="text-[10px] text-neutral-400 mt-1 block">Campaign hashtags required for verification</span>
-            </div>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1">
+              Required Mentions
+            </label>
+            <input
+              value={form.mentionRequirements}
+              onChange={(e) => setForm({ ...form, mentionRequirements: e.target.value })}
+              placeholder="e.g. @brandaccount @creatorflow"
+              className="w-full rounded-xl border border-navy/10 bg-surface px-4 py-2.5 text-sm outline-none focus:border-navy"
+            />
+            <span className="text-[10px] text-neutral-400 mt-1 block">Account handles editors must tag in captions</span>
           </div>
 
           {/* Formatted Guidelines Editor */}

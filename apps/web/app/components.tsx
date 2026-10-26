@@ -91,12 +91,12 @@ export function PublicNav() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-navy/10 bg-paper/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-black/5 dark:border-white/5 bg-transparent backdrop-blur-md transition-colors">
       <div className="container flex h-20 items-center justify-between">
         <LogoBrand />
-        <nav className="hidden items-center gap-7 text-sm font-semibold text-neutral-700 md:flex">
+        <nav className="hidden items-center gap-7 text-sm font-semibold text-neutral-700 dark:text-neutral-300 md:flex">
           {links.map(([label, href]) => (
-            <Link className="transition hover:text-navy" key={label} href={href}>
+            <Link className="transition hover:text-navy dark:hover:text-cyan-400" key={label} href={href}>
               {label}
             </Link>
           ))}
@@ -207,7 +207,7 @@ export function PublicNav() {
           </div>
 
           <button
-            className="icon-button shrink-0 md:hidden"
+            className="icon-button shrink-0 md:hidden !text-neutral-900 dark:!text-white bg-white/80 dark:bg-white/10 border border-black/10 dark:border-white/15"
             onClick={() => setOpen(!open)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
@@ -217,80 +217,117 @@ export function PublicNav() {
         </div>
       </div>
       {open && (
-        <nav className="container grid gap-3 border-t border-navy/10 py-5 md:hidden">
-          {links.map(([label, href]) => (
-            <Link onClick={() => setOpen(false)} className="py-2 text-base font-semibold" key={label} href={href}>
-              {label}
-            </Link>
-          ))}
-          <div className="my-1 border-t border-navy/10" />
-          <div className="grid gap-2">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Brand</p>
-            <div className="grid grid-cols-2 gap-2">
+        <div className="container pb-5 md:hidden">
+          <nav className="rounded-3xl border border-black/10 bg-white/95 p-5 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0c1829]/95 space-y-4">
+            <div className="grid gap-1">
+              <Link
+                onClick={() => setOpen(false)}
+                className="py-2.5 px-3 rounded-xl font-bold text-sm text-neutral-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition"
+                href="/"
+              >
+                How it works
+              </Link>
+              <a
+                onClick={() => setOpen(false)}
+                className="py-2.5 px-3 rounded-xl font-bold text-sm text-neutral-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition"
+                href="#for-brands"
+              >
+                For Brands
+              </a>
+              <a
+                onClick={() => setOpen(false)}
+                className="py-2.5 px-3 rounded-xl font-bold text-sm text-neutral-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition"
+                href="#for-creators"
+              >
+                For Editors
+              </a>
+            </div>
+
+            <div className="border-t border-black/10 dark:border-white/10" />
+
+            <div className="grid gap-2">
+              <p className="text-[11px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Brand</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    triggerAuth("creator", "login");
+                  }}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-black/15 dark:border-white/20 bg-neutral-100 dark:bg-white/10 py-2.5 text-xs font-bold text-neutral-900 dark:text-white hover:bg-neutral-200 dark:hover:bg-white/20 transition shadow-xs"
+                >
+                  <span className="grid h-4 w-4 place-items-center rounded-full bg-[#64748b] text-[9px] text-white">B</span>
+                  Sign In
+                </button>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    triggerAuth("creator", "create");
+                  }}
+                  className="inline-flex items-center justify-center rounded-full border border-black/15 dark:border-white/20 bg-neutral-100 dark:bg-white/10 py-2.5 text-xs font-bold text-neutral-900 dark:text-white hover:bg-neutral-200 dark:hover:bg-white/20 transition shadow-xs"
+                >
+                  Create Account
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-2 pt-1">
+              <p className="text-[11px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Editor</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    triggerAuth("editor", "login");
+                  }}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-navy py-2.5 text-xs font-bold text-white shadow-cyan-glow hover:opacity-95 transition"
+                >
+                  <Pencil size={12} />
+                  Sign In
+                </button>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    triggerAuth("editor", "create");
+                  }}
+                  className="inline-flex items-center justify-center rounded-full border border-black/15 dark:border-white/20 bg-neutral-100 dark:bg-white/10 py-2.5 text-xs font-bold text-neutral-900 dark:text-white hover:bg-neutral-200 dark:hover:bg-white/20 transition shadow-xs"
+                >
+                  Join as Editor
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-black/10 dark:border-white/10 pt-2 text-center">
               <button
                 onClick={() => {
                   setOpen(false);
-                  triggerAuth("creator", "login");
+                  triggerAuth("admin", "login");
                 }}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full border border-navy/20 bg-white py-2.5 text-xs font-bold text-navy"
+                className="text-xs font-bold text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition"
               >
-                <span className="grid h-4 w-4 place-items-center rounded-full bg-[#64748b] text-[9px] text-white">B</span>
-                Sign In
-              </button>
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  triggerAuth("creator", "create");
-                }}
-                className="inline-flex items-center justify-center rounded-full border border-navy/20 bg-white py-2.5 text-xs font-bold text-navy"
-              >
-                Create Account
+                Admin Console Access →
               </button>
             </div>
-          </div>
-          <div className="grid gap-2 pt-1">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Editor</p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  triggerAuth("editor", "login");
-                }}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-navy py-2.5 text-xs font-bold text-white"
-              >
-                <Pencil size={12} />
-                Sign In
-              </button>
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  triggerAuth("editor", "create");
-                }}
-                className="inline-flex items-center justify-center rounded-full bg-navy/90 py-2.5 text-xs font-bold text-white"
-              >
-                Join as Editor
-              </button>
-            </div>
-          </div>
-        </nav>
+          </nav>
+        </div>
       )}
     </header>
   );
 }
 
 export function Footer() {
-  return <footer className="border-t border-navy/10 bg-white">
-    <div className="container flex flex-col gap-5 py-10 text-sm text-neutral-600 md:flex-row md:items-center md:justify-between">
-      <LogoBrand />
-      <span>© 2026 Reviral. All rights reserved.</span>
-      <div className="flex flex-wrap gap-5">
-        <Link href="/?auth=creator-login">Brand sign in</Link>
-        <Link href="/?auth=creator-create">Start a campaign</Link>
-        <Link href="/?auth=editor-create">Editor sign in / Join</Link>
-        <Link href="/?auth=admin-login" className="text-neutral-400 hover:text-navy">Admin Portal</Link>
+  return (
+    <footer className="border-t border-black/5 dark:border-white/5 bg-white dark:bg-[#070b14] transition-colors">
+      <div className="container flex flex-col gap-5 py-10 text-sm text-neutral-600 dark:text-neutral-400 md:flex-row md:items-center md:justify-between">
+        <LogoBrand />
+        <span>© 2026 Reviral. All rights reserved.</span>
+        <div className="flex flex-wrap gap-5 font-semibold text-xs">
+          <Link href="/?auth=creator-login" className="hover:text-navy dark:hover:text-cyan-400 transition">Brand sign in</Link>
+          <Link href="/?auth=creator-create" className="hover:text-navy dark:hover:text-cyan-400 transition">Start a campaign</Link>
+          <Link href="/?auth=editor-create" className="hover:text-navy dark:hover:text-cyan-400 transition">Editor sign in / Join</Link>
+          <Link href="/?auth=admin-login" className="text-neutral-400 hover:text-navy dark:hover:text-cyan-400 transition">Admin Portal</Link>
+        </div>
       </div>
-    </div>
-  </footer>;
+    </footer>
+  );
 }
 
 export function StatusBadge({ status }: { status: string }) {
@@ -399,7 +436,7 @@ export function CampaignCard({
   return (
     <Link
       href={targetLink}
-      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-navy/10 bg-white p-3.5 shadow-xs hover:border-navy/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-navy/10 bg-white p-3.5 shadow-xs hover:border-navy/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 dark:border-white/10 dark:bg-[#0e1626] dark:hover:border-cyan-500/40"
     >
       <div>
         {/* 16:9 Thumbnail or Dummy Image */}
@@ -438,11 +475,11 @@ export function CampaignCard({
         {/* Creator Info Row */}
         <div className="mt-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-navy text-[10px] font-black text-white">
+            <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-navy text-[10px] font-black text-white dark:bg-cyan-500 dark:text-neutral-950">
               {campaign.creator?.name?.slice(0, 2).toUpperCase() || "CF"}
             </div>
             <div className="min-w-0 flex items-center gap-1">
-              <span className="truncate text-xs font-bold text-neutral-800">
+              <span className="truncate text-xs font-bold text-neutral-800 dark:text-neutral-200">
                 {campaign.creator?.name || "Creator"}
               </span>
               <span title="Verified Creator" className="inline-flex shrink-0">
@@ -450,13 +487,13 @@ export function CampaignCard({
               </span>
             </div>
           </div>
-          <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+          <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:bg-white/10 dark:text-neutral-300">
             {campaign.category}
           </span>
         </div>
 
         {/* Campaign Title */}
-        <h3 className="mt-2.5 line-clamp-2 text-sm font-black tracking-tight text-neutral-900 group-hover:text-navy transition leading-snug">
+        <h3 className="mt-2.5 line-clamp-2 text-sm font-black tracking-tight text-neutral-900 group-hover:text-navy dark:text-white dark:group-hover:text-cyan-400 transition leading-snug">
           {campaign.title}
         </h3>
       </div>
@@ -468,13 +505,13 @@ export function CampaignCard({
             <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400">
               Max Payout
             </span>
-            <span className="text-sm font-black text-emerald-600">
+            <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
               ₹{maxEarningMajor.toLocaleString("en-IN")}
             </span>
           </div>
 
           <div className="text-right">
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700 border border-emerald-200">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30">
               <TrendingUp size={11} className="shrink-0" />
               <span>₹{rateVal} / 1k</span>
             </span>
@@ -483,10 +520,10 @@ export function CampaignCard({
 
         {/* Slots remaining bar with Lucide Users icon */}
         <div className="space-y-1.5 pt-0.5">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-neutral-500">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
             <span className="flex items-center gap-1.5">
-              <Users size={12} className="text-navy shrink-0" />
-              <span className={remaining === 0 ? "text-red-600 font-bold" : "text-neutral-700"}>
+              <Users size={12} className="text-navy dark:text-cyan-400 shrink-0" />
+              <span className={remaining === 0 ? "text-red-500 font-bold" : "text-neutral-700 dark:text-neutral-200"}>
                 {remaining === 0 ? "Slots full" : `${remaining} of ${totalSlots} slots left`}
               </span>
             </span>
@@ -496,10 +533,10 @@ export function CampaignCard({
               </span>
             ) : null}
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-white/10">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
-                remaining === 0 ? "bg-red-500" : "bg-navy"
+                remaining === 0 ? "bg-red-500" : "bg-navy dark:bg-cyan-500"
               }`}
               style={{ width: `${percentFilled}%` }}
             />

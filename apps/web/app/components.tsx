@@ -17,6 +17,7 @@ import {
   Users,
   CheckCircle2,
   TrendingUp,
+  Video,
 } from "lucide-react";
 
 export function ThemeToggle() {
@@ -386,6 +387,7 @@ export interface CampaignCardData {
   title: string;
   description?: string;
   thumbnail?: string | null;
+  videoUrl?: string | null;
   category: string;
   socialPlatform: "Instagram" | "YouTube" | string;
   campaignFund?: number;
@@ -470,6 +472,14 @@ export function CampaignCard({
               </span>
             )}
           </div>
+
+          {/* Raw Footage Indicator Badge */}
+          {campaign.videoUrl && (
+            <div className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-full bg-navy/85 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md border border-white/10 shadow-xs">
+              <Video size={11} className="text-sky-300" />
+              <span>Footage Ready</span>
+            </div>
+          )}
         </div>
 
         {/* Creator Info Row */}

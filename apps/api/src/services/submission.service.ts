@@ -103,6 +103,7 @@ export const submissionService = {
             socialPlatform: true,
             category: true,
             currency: true,
+            videoUrl: true,
             creator: { select: { id: true, name: true, username: true, avatarUrl: true } },
           },
         },

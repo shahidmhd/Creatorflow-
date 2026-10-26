@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ExternalLink, Link as LinkIcon, Send, Sparkles, Loader2, AlertCircle, PlusCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, ExternalLink, Link as LinkIcon, Send, Sparkles, Loader2, AlertCircle, PlusCircle, RefreshCw, Video } from "lucide-react";
 import { api, ApiError } from "@/app/api";
 import { StatusBadge } from "@/app/components";
 
@@ -21,6 +21,7 @@ interface MySubmission {
     campaignFund?: number;
     editorRewardPool?: number;
     currency: string;
+    videoUrl?: string | null;
     creator?: {
       name: string;
       username?: string;
@@ -52,6 +53,7 @@ interface MyApplication {
     status: string;
     rewardAmount: number;
     currency: string;
+    videoUrl?: string | null;
   };
 }
 
@@ -202,9 +204,21 @@ export default function EditorSubmissionsPage() {
               >
                 <div>
                   <h4 className="text-sm font-bold text-neutral-900">{app.campaign.title}</h4>
-                  <p className="text-xs text-neutral-400">
-                    Gross Payout: ₹{(app.campaign.rewardAmount / 100).toLocaleString("en-IN")}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2.5 mt-0.5">
+                    <p className="text-xs text-neutral-400">
+                      Gross Payout: ₹{(app.campaign.rewardAmount / 100).toLocaleString("en-IN")}
+                    </p>
+                    {app.campaign.videoUrl && (
+                      <a
+                        href={app.campaign.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-navy hover:underline"
+                      >
+                        <Video size={12} /> Raw Footage <ExternalLink size={10} />
+                      </a>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => {
@@ -235,6 +249,29 @@ export default function EditorSubmissionsPage() {
               Cancel
             </button>
           </div>
+
+          {(() => {
+            const activeApp = approvedApplications.find((a) => a.campaignId === activeModalCampaignId);
+            const activeSub = submissions.find((s) => s.campaignId === activeModalCampaignId);
+            const footageUrl = activeApp?.campaign.videoUrl || activeSub?.campaign.videoUrl;
+            if (!footageUrl) return null;
+            return (
+              <div className="rounded-xl bg-sky-50 border border-sky-200 px-3.5 py-2 flex items-center justify-between text-xs">
+                <span className="font-semibold text-sky-900 flex items-center gap-1.5">
+                  <Video size={13} className="text-sky-600 shrink-0" />
+                  <span>Raw Footage & Asset Pack</span>
+                </span>
+                <a
+                  href={footageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-navy hover:underline inline-flex items-center gap-1"
+                >
+                  Access Assets <ExternalLink size={11} />
+                </a>
+              </div>
+            );
+          })()}
           <form onSubmit={handleCreateOrResubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase text-neutral-600 mb-1">Content URL *</label>

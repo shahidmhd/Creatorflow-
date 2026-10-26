@@ -18,6 +18,8 @@ import {
   SlidersHorizontal,
   RefreshCw,
   Layers,
+  Video,
+  ExternalLink,
 } from "lucide-react";
 import { api } from "@/app/api";
 import { CampaignCard, CampaignCardData } from "@/app/components";
@@ -120,6 +122,13 @@ export default function EditorBrowseCampaignsPage() {
                     <CheckCircle2 size={13} className="text-sky-400 fill-sky-400/20" />
                   </span>
                 )}
+
+                {featured.videoUrl && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/25 px-3 py-1 backdrop-blur-md border border-sky-400/40 text-sky-200">
+                    <Video size={13} className="text-sky-300" />
+                    <span>Raw Footage Ready</span>
+                  </span>
+                )}
               </div>
 
               {/* Title & Description */}
@@ -158,7 +167,17 @@ export default function EditorBrowseCampaignsPage() {
             </div>
 
             {/* Action Group */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              {featured.videoUrl && (
+                <a
+                  href={featured.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 text-xs font-bold text-white transition backdrop-blur-md"
+                >
+                  <Video size={13} /> Raw Footage <ExternalLink size={12} />
+                </a>
+              )}
               <Link
                 href={`/editor/campaigns/${featured.id}`}
                 className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-xs font-black text-navy hover:bg-neutral-100 transition shadow-xs"

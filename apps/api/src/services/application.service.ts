@@ -59,7 +59,7 @@ export const applicationService = {
   async findByEditor(editorId: string) {
     return prisma.campaignApplication.findMany({
       where: { editorId },
-      include: { campaign: { select: { id: true, title: true, status: true, rewardAmount: true, currency: true, deadline: true } } },
+      include: { campaign: { select: { id: true, title: true, status: true, rewardAmount: true, currency: true, deadline: true, videoUrl: true } } },
       orderBy: { createdAt: "desc" },
     });
   },

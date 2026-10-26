@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Clock, Send, AlertCircle, Loader2, Users, Eye, Sparkles, Instagram, Youtube } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock, Send, AlertCircle, Loader2, Users, Eye, Sparkles, Instagram, Youtube, Video, ExternalLink, Download } from "lucide-react";
 import { api, ApiError } from "@/app/api";
 import { CampaignDummyThumbnail } from "@/app/components";
 
@@ -12,6 +12,7 @@ interface CampaignDetail {
   title: string;
   description: string;
   thumbnail?: string | null;
+  videoUrl?: string | null;
   category: string;
   socialPlatform: string;
   campaignFund?: number;
@@ -263,6 +264,63 @@ export default function EditorCampaignDetailPage() {
             <p className="text-sm leading-6 text-neutral-600">{campaign.description}</p>
           </div>
 
+          {/* Raw Footage / Asset Pack Link (Google Drive / Dropbox / Frame.io) */}
+          <div className="rounded-2xl border border-navy/15 bg-gradient-to-br from-white via-sky-50/20 to-sky-100/30 p-5 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-navy text-white shadow-xs">
+                  <Video size={20} />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-black text-neutral-900 uppercase tracking-wider">
+                      Raw Footage / Asset Pack Link
+                    </h3>
+                    <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[10px] font-bold text-sky-800 border border-sky-200">
+                      Google Drive / Dropbox / Frame.io
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-500">
+                    {campaign.videoUrl
+                      ? "Download source clips, footage, and brand asset pack to create your edit."
+                      : "No external footage link was attached to this campaign. Check creative guidelines below."}
+                  </p>
+                </div>
+              </div>
+
+              {campaign.videoUrl ? (
+                <a
+                  href={campaign.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-navy/90 hover:shadow transition shrink-0"
+                >
+                  <Video size={14} />
+                  <span>Open Footage Link</span>
+                  <ExternalLink size={13} />
+                </a>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-1.5 text-xs font-bold text-neutral-400 shrink-0">
+                  Not Provided
+                </span>
+              )}
+            </div>
+
+            {campaign.videoUrl && (
+              <div className="mt-3.5 pt-3 border-t border-navy/10 flex flex-wrap items-center gap-2 text-xs">
+                <span className="font-bold text-neutral-400 shrink-0">Source Link:</span>
+                <a
+                  href={campaign.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate max-w-full font-mono text-xs text-navy font-semibold hover:underline"
+                >
+                  {campaign.videoUrl}
+                </a>
+              </div>
+            )}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2 rounded-xl bg-surface p-4 text-xs leading-5">
             <div>
               <span className="font-bold text-neutral-700 block">Content Requirements:</span>
@@ -314,7 +372,17 @@ export default function EditorCampaignDetailPage() {
                   {existingApp.status === "WITHDRAWN" &&
                     "You withdrew your application from this campaign."}
                 </p>
-                <div className="pt-2">
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
+                  {campaign.videoUrl && (
+                    <a
+                      href={campaign.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-navy px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-navy/90 transition"
+                    >
+                      <Video size={13} /> Access Raw Footage <ExternalLink size={12} />
+                    </a>
+                  )}
                   <Link
                     href="/editor/submissions"
                     className="inline-block rounded-full bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition"

@@ -110,6 +110,65 @@ export interface AdminAuditLog {
   } | null;
 }
 
+export interface RevenueSummary {
+  totalGMV: number;
+  totalPlatformFees: number;
+  totalDisbursedToEditors: number;
+  pendingEscrow: number;
+  takeRate: number;
+  timeframe: string;
+  periodGMV: number;
+  periodPlatformFees: number;
+  periodDisbursed: number;
+  periodTransactionsCount: number;
+  averageTransactionFee: number;
+}
+
+export interface RevenueChartPoint {
+  key: string;
+  label: string;
+  gross: number;
+  platformFee: number;
+  netPayout: number;
+  transactions: number;
+}
+
+export interface RevenueTransaction {
+  id: string;
+  campaignId: string;
+  campaignTitle: string;
+  campaignCategory: string;
+  platform: string;
+  creatorName: string;
+  creatorUsername: string;
+  editorId: string;
+  editorName: string;
+  editorUsername: string;
+  verifiedViews: number;
+  grossAmount: number;
+  platformFee: number;
+  netAmount: number;
+  feePercentage: number;
+  status: string;
+  creditedAt: string;
+}
+
+export interface TopCampaignRevenue {
+  id: string;
+  title: string;
+  creatorName: string;
+  totalRevenue: number;
+  totalDisbursed: number;
+  transactionCount: number;
+}
+
+export interface RevenueAnalyticsResponse {
+  summary: RevenueSummary;
+  chartData: RevenueChartPoint[];
+  transactions: RevenueTransaction[];
+  topCampaigns: TopCampaignRevenue[];
+}
+
 export const formatRupees = (amount: number) => `₹${Math.round(amount).toLocaleString("en-IN")}`;
 export const formatPaise = (paise: number) => `₹${(Math.floor(paise || 0) / 100).toLocaleString("en-IN")}`;
 export const formatViews = (views: number) => (views || 0).toLocaleString("en-IN");
@@ -126,3 +185,4 @@ export const formatDate = (dateString: string) => {
     return dateString;
   }
 };
+

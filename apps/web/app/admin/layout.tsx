@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AlertTriangle, BriefcaseBusiness, History, LayoutDashboard, LogOut, Menu, Settings, ShieldAlert, Users, X } from "lucide-react";
+import { AlertTriangle, BriefcaseBusiness, CircleDollarSign, History, LayoutDashboard, LogOut, Menu, Settings, ShieldAlert, Users, X } from "lucide-react";
 import { getAuthSession, clearAuthData } from "../api";
 import { ThemeToggle } from "../components";
 
 const navItems = [
   { label: "Overview", href: "/admin", Icon: LayoutDashboard },
+  { label: "Revenue", href: "/admin/revenue", Icon: CircleDollarSign },
   { label: "Campaigns", href: "/admin/campaigns", Icon: BriefcaseBusiness },
   { label: "Users", href: "/admin/users", Icon: Users },
   { label: "Activity Logs", href: "/admin/audit-logs", Icon: History },

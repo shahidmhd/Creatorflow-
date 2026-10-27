@@ -185,4 +185,237 @@ export const adminService = {
       data: { resolved: true, resolvedAt: new Date() },
     });
   },
+
+  async getRevenueAnalytics(timeframe = "monthly") {
+    const [rewards, campaigns, creditedAgg, totalCampaignFundAgg] = await Promise.all([
+      prisma.reward.findMany({
+        where: { status: "CREDITED" },
+        include: {
+          campaign: {
+            include: {
+              creator: { select: { id: true, name: true, username: true, email: true } },
+            },
+          },
+          editor: { select: { id: true, name: true, username: true, email: true } },
+        },
+        orderBy: { creditedAt: "desc" },
+      }),
+      prisma.campaign.findMany({
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          campaignFund: true,
+          rewardAmount: true,
+          platformFee: true,
+          createdAt: true,
+          creator: { select: { id: true, name: true, username: true } },
+        },
+      }),
+      prisma.reward.aggregate({
+        where: { status: "CREDITED" },
+        _sum: { grossAmount: true, platformFee: true, netAmount: true },
+        _count: true,
+      }),
+      prisma.campaign.aggregate({
+        _sum: { campaignFund: true },
+      }),
+    ]);
+
+    const totalGMV = totalCampaignFundAgg._sum.campaignFund ?? 0;
+    const totalPlatformFees = creditedAgg._sum.platformFee ?? 0;
+    const totalDisbursedToEditors = creditedAgg._sum.netAmount ?? 0;
+    const totalDisbursedGross = creditedAgg._sum.grossAmount ?? 0;
+    const pendingEscrow = Math.max(0, totalGMV - totalDisbursedGross);
+
+    const now = new Date();
+    const tf = timeframe.toLowerCase();
+
+    interface Bucket {
+      key: string;
+      label: string;
+      startDate: Date;
+      endDate: Date;
+      gross: number;
+      platformFee: number;
+      netPayout: number;
+      transactions: number;
+    }
+
+    const chartBuckets: Bucket[] = [];
+
+    if (tf === "daily") {
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        d.setHours(0, 0, 0, 0);
+
+        const endD = new Date(d);
+        endD.setHours(23, 59, 59, 999);
+
+        const label = d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
+        chartBuckets.push({
+          key: d.toISOString().split("T")[0],
+          label,
+          startDate: d,
+          endDate: endD,
+          gross: 0,
+          platformFee: 0,
+          netPayout: 0,
+          transactions: 0,
+        });
+      }
+    } else if (tf === "weekly") {
+      for (let i = 7; i >= 0; i--) {
+        const start = new Date(now);
+        start.setDate(start.getDate() - i * 7 - ((start.getDay() + 6) % 7));
+        start.setHours(0, 0, 0, 0);
+
+        const end = new Date(start);
+        end.setDate(end.getDate() + 6);
+        end.setHours(23, 59, 59, 999);
+
+        const label = `Wk ${start.toLocaleDateString("en-US", { day: "numeric", month: "short" })}`;
+        chartBuckets.push({
+          key: `w-${i}-${start.toISOString().split("T")[0]}`,
+          label,
+          startDate: start,
+          endDate: end,
+          gross: 0,
+          platformFee: 0,
+          netPayout: 0,
+          transactions: 0,
+        });
+      }
+    } else if (tf === "yearly") {
+      const currentYear = now.getFullYear();
+      for (let yr = currentYear - 4; yr <= currentYear; yr++) {
+        const start = new Date(yr, 0, 1, 0, 0, 0, 0);
+        const end = new Date(yr, 11, 31, 23, 59, 59, 999);
+        chartBuckets.push({
+          key: `yr-${yr}`,
+          label: String(yr),
+          startDate: start,
+          endDate: end,
+          gross: 0,
+          platformFee: 0,
+          netPayout: 0,
+          transactions: 0,
+        });
+      }
+    } else {
+      // Monthly or all-time (12 months)
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const endD = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
+        const label = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+        chartBuckets.push({
+          key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+          label,
+          startDate: d,
+          endDate: endD,
+          gross: 0,
+          platformFee: 0,
+          netPayout: 0,
+          transactions: 0,
+        });
+      }
+    }
+
+    rewards.forEach((r) => {
+      const date = r.creditedAt ? new Date(r.creditedAt) : new Date(r.createdAt);
+      for (const bucket of chartBuckets) {
+        if (date >= bucket.startDate && date <= bucket.endDate) {
+          bucket.gross += r.grossAmount;
+          bucket.platformFee += r.platformFee;
+          bucket.netPayout += r.netAmount;
+          bucket.transactions += 1;
+          break;
+        }
+      }
+    });
+
+    const periodStart = chartBuckets.length > 0 ? chartBuckets[0].startDate : new Date(0);
+    const periodEnd = chartBuckets.length > 0 ? chartBuckets[chartBuckets.length - 1].endDate : new Date();
+
+    const periodRewards = rewards.filter((r) => {
+      const d = r.creditedAt ? new Date(r.creditedAt) : new Date(r.createdAt);
+      return d >= periodStart && d <= periodEnd;
+    });
+
+    const periodGMV = periodRewards.reduce((sum, r) => sum + r.grossAmount, 0);
+    const periodPlatformFees = periodRewards.reduce((sum, r) => sum + r.platformFee, 0);
+    const periodDisbursed = periodRewards.reduce((sum, r) => sum + r.netAmount, 0);
+    const periodTransactionsCount = periodRewards.length;
+    const averageTransactionFee = periodTransactionsCount > 0
+      ? Math.round(periodPlatformFees / periodTransactionsCount)
+      : 0;
+
+    const campaignRevenueMap = new Map<string, { id: string; title: string; creatorName: string; totalRevenue: number; totalDisbursed: number; transactionCount: number }>();
+    rewards.forEach((r) => {
+      const cId = r.campaignId;
+      const existing = campaignRevenueMap.get(cId) ?? {
+        id: cId,
+        title: r.campaign?.title ?? "Campaign",
+        creatorName: r.campaign?.creator?.name ?? "Creator",
+        totalRevenue: 0,
+        totalDisbursed: 0,
+        transactionCount: 0,
+      };
+      existing.totalRevenue += r.platformFee;
+      existing.totalDisbursed += r.netAmount;
+      existing.transactionCount += 1;
+      campaignRevenueMap.set(cId, existing);
+    });
+
+    const topCampaigns = Array.from(campaignRevenueMap.values())
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0, 5);
+
+    const transactions = rewards.map((r) => ({
+      id: r.id,
+      campaignId: r.campaignId,
+      campaignTitle: r.campaign?.title ?? "Unknown Campaign",
+      campaignCategory: r.campaign?.category ?? "General",
+      platform: r.campaign?.socialPlatform ?? "Instagram",
+      creatorName: r.campaign?.creator?.name ?? "Unknown Creator",
+      creatorUsername: r.campaign?.creator?.username ?? "creator",
+      editorId: r.editorId,
+      editorName: r.editor?.name ?? "Unknown Editor",
+      editorUsername: r.editor?.username ?? "editor",
+      verifiedViews: r.verifiedViews,
+      grossAmount: r.grossAmount,
+      platformFee: r.platformFee,
+      netAmount: r.netAmount,
+      feePercentage: r.feePercentage,
+      status: r.status,
+      creditedAt: (r.creditedAt ?? r.createdAt).toISOString(),
+    }));
+
+    return {
+      summary: {
+        totalGMV,
+        totalPlatformFees,
+        totalDisbursedToEditors,
+        pendingEscrow,
+        takeRate: 15,
+        timeframe: tf,
+        periodGMV,
+        periodPlatformFees,
+        periodDisbursed,
+        periodTransactionsCount,
+        averageTransactionFee,
+      },
+      chartData: chartBuckets.map((b) => ({
+        key: b.key,
+        label: b.label,
+        gross: b.gross,
+        platformFee: b.platformFee,
+        netPayout: b.netPayout,
+        transactions: b.transactions,
+      })),
+      transactions,
+      topCampaigns,
+    };
+  },
 };

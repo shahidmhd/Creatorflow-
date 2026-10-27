@@ -75,6 +75,15 @@ adminRoutes.get("/rewards", async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+/** GET /api/v1/admin/revenue — platform fee revenue and breakdown */
+adminRoutes.get("/revenue", async (req, res, next) => {
+  try {
+    const timeframe = (req.query.timeframe as string) || "monthly";
+    const data = await adminService.getRevenueAnalytics(timeframe);
+    success(res, data);
+  } catch (err) { next(err); }
+});
+
 /** GET /api/v1/admin/settings */
 adminRoutes.get("/settings", async (_req, res, next) => {
   try {

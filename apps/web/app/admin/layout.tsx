@@ -52,9 +52,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-surface text-neutral-900 dark:text-white">
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-black/5 dark:border-white/10 bg-white dark:bg-[#0c1829] px-5 py-7 lg:flex">
-        <Link href="/admin" className="flex items-center gap-3 text-left">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-navy text-sm font-black text-white">CF</span>
-          <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">CREATORFLOW</span>
+        <Link href="/admin" className="flex items-center gap-2.5 text-left">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy text-sm font-black text-white">Re</span>
+          <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">REVIRAL</span>
         </Link>
         <p className="mb-3 mt-10 px-3 text-xs font-bold uppercase tracking-[.16em] text-neutral-400">Admin Control</p>
         <nav className="space-y-1">
@@ -95,8 +95,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <aside className="fixed inset-y-0 left-0 z-50 w-72 flex-col border-r border-black/10 dark:border-white/10 bg-white dark:bg-[#0c1829] p-6 shadow-2xl flex">
             <div className="flex items-center justify-between pb-6 border-b border-black/5 dark:border-white/10">
               <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2.5 text-left">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy text-sm font-black text-white">CF</span>
-                <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">CREATORFLOW</span>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy text-sm font-black text-white">Re</span>
+                <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">REVIRAL</span>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
@@ -152,8 +152,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu size={18} />
             </button>
             <div className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-black text-white">CF</span>
-              <span className="font-black tracking-[-0.08em] text-neutral-900 dark:text-white">ADMIN</span>
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-black text-white">Re</span>
+              <span className="font-black tracking-[-0.08em] text-neutral-900 dark:text-white">REVIRAL ADMIN</span>
             </div>
           </div>
           <span className="hidden text-sm font-semibold text-neutral-500 dark:text-neutral-400 lg:block">System Administration</span>

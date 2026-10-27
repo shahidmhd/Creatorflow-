@@ -9,9 +9,9 @@ export default function AdminProfilePage() {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    name: "CreatorFlow Admin",
+    name: "ReViral Admin",
     username: "admin",
-    email: "admin@creatorflow.app",
+    email: "admin@reviral.app",
     role: "ADMIN",
   });
 
@@ -26,9 +26,9 @@ export default function AdminProfilePage() {
       .then((data) => {
         if (data) {
           setForm({
-            name: data.name || "CreatorFlow Admin",
+            name: data.name || "ReViral Admin",
             username: data.username || "admin",
-            email: data.email || "admin@creatorflow.app",
+            email: data.email || "admin@reviral.app",
             role: data.role || "ADMIN",
           });
         }

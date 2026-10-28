@@ -22,7 +22,6 @@ import { authApi, api, UserSession, setAuthData } from "./api";
 import { NeuralBackground } from "./landing-components/NeuralBackground";
 import { FloatingSocialBadges } from "./landing-components/FloatingSocialBadges";
 import { HeroThreeStepWorkflow } from "./landing-components/HeroThreeStepWorkflow";
-import { InteractivePayoutCalculator } from "./landing-components/InteractivePayoutCalculator";
 
 /* ─── Fallback campaign data ─────────────────────────────── */
 const fallbackCampaigns: CampaignCardData[] = [
@@ -255,7 +254,7 @@ function HomeContent() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4rem] font-black leading-[1.04] tracking-[-0.04em] text-neutral-900 dark:text-white max-w-4xl mx-auto">
               Every great <br className="hidden sm:inline" />
               <span className="bg-gradient-to-r from-cyan-500 via-sky-400 to-violet-500 bg-clip-text text-transparent">
-                moment deserves a second life.
+                moment deserves a second life
               </span>
             </h1>
 
@@ -331,15 +330,6 @@ function HomeContent() {
                 <CampaignCard key={camp.id} campaign={camp} />
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════
-            INTERACTIVE PAYOUT CALCULATOR
-        ══════════════════════════════════════════════════ */}
-        <section className="py-20 md:py-28 border-b border-black/5 dark:border-white/5 bg-surface/40 dark:bg-black/20">
-          <div className="container max-w-6xl mx-auto">
-            <InteractivePayoutCalculator />
           </div>
         </section>
 

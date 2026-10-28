@@ -222,7 +222,7 @@ function HomeContent() {
         setAuthData(res.token, res.user);
         window.location.href =
           res.user.role === "ADMIN" ? "/admin/settings" :
-          res.user.role === "EDITOR" ? "/editor" : "/creator";
+            res.user.role === "EDITOR" ? "/editor" : "/creator";
       }
     } catch (error) {
       setAuthNotice(error instanceof Error ? error.message : "Authentication failed");
@@ -246,19 +246,22 @@ function HomeContent() {
 
           <div className="container relative z-10 max-w-6xl mx-auto text-center">
             {/* Pill Header Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-[.18em] text-cyan-700 dark:text-cyan-400 mb-6 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-extrabold tracking-wide text-cyan-700 dark:text-cyan-400 mb-6 backdrop-blur-md">
               <Sparkles size={14} className="text-cyan-500" />
-              AI-Powered Editorial Pipeline & Escrow
+              Long videos in. Short clips out.
             </div>
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4rem] font-black leading-[1.04] tracking-[-0.04em] text-neutral-900 dark:text-white max-w-4xl mx-auto">
-              Turn Long Videos Into <span className="bg-gradient-to-r from-cyan-500 via-sky-400 to-violet-500 bg-clip-text text-transparent">Viral Shorts</span>.
+              Every great <br className="hidden sm:inline" />
+              <span className="bg-gradient-to-r from-cyan-500 via-sky-400 to-violet-500 bg-clip-text text-transparent">
+                moment deserves a second life.
+              </span>
             </h1>
 
             {/* Subheading */}
             <p className="mt-5 text-base sm:text-lg md:text-xl leading-relaxed text-neutral-600 dark:text-neutral-200 max-w-2xl mx-auto font-medium">
-              Top editors turn your podcasts & YouTube streams into high-converting Instagram Reels and TikTok shorts. Fund your campaign and pay only for real, verified views.
+              Got a long video, like a podcast or a talk? Editors on Reviral cut it into short clips and post them online. You set a budget and pay only for the views those clips really get.
             </p>
 
             {/* Primary Action Buttons */}
@@ -266,7 +269,7 @@ function HomeContent() {
               <Link
                 href="/?auth=creator-create"
                 id="cta-footage"
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-navy px-8 py-4 text-sm font-black text-white shadow-cyan-glow hover:opacity-95 active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-navy px-8 py-4 text-sm font-black text-white hover:opacity-95 active:scale-[0.98] transition-all"
               >
                 Launch Campaign <ArrowRight size={16} />
               </Link>
@@ -275,7 +278,7 @@ function HomeContent() {
                 id="cta-edit"
                 className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/80 dark:border-white/10 dark:bg-white/5 px-8 py-4 text-sm font-black text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/10 active:scale-[0.98] transition-all backdrop-blur-md"
               >
-                Start Editing ✂️
+                Start Editing
               </Link>
             </div>
 
@@ -462,22 +465,20 @@ function HomeContent() {
               <div className="mb-5 flex rounded-full bg-neutral-100 dark:bg-white/10 p-1 text-xs font-semibold text-neutral-700 dark:text-neutral-300">
                 <button
                   type="button"
-                  className={`flex-1 rounded-full px-3 py-1.5 transition-all ${
-                    authMode === "login"
-                      ? "bg-white dark:bg-[#152a45] text-neutral-900 dark:text-white shadow font-bold"
-                      : "hover:text-neutral-900 dark:hover:text-white"
-                  }`}
+                  className={`flex-1 rounded-full px-3 py-1.5 transition-all ${authMode === "login"
+                    ? "bg-white dark:bg-[#152a45] text-neutral-900 dark:text-white shadow font-bold"
+                    : "hover:text-neutral-900 dark:hover:text-white"
+                    }`}
                   onClick={() => { setAuthMode("login"); setAuthNotice(""); }}
                 >
                   Sign in
                 </button>
                 <button
                   type="button"
-                  className={`flex-1 rounded-full px-3 py-1.5 transition-all ${
-                    authMode === "create"
-                      ? "bg-white dark:bg-[#152a45] text-neutral-900 dark:text-white shadow font-bold"
-                      : "hover:text-neutral-900 dark:hover:text-white"
-                  }`}
+                  className={`flex-1 rounded-full px-3 py-1.5 transition-all ${authMode === "create"
+                    ? "bg-white dark:bg-[#152a45] text-neutral-900 dark:text-white shadow font-bold"
+                    : "hover:text-neutral-900 dark:hover:text-white"
+                    }`}
                   onClick={() => { setAuthMode("create"); setAuthNotice(""); }}
                 >
                   Create account

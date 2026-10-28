@@ -48,9 +48,17 @@ export function ThemeToggle() {
 
 export function LogoBrand({ href = "/" }: { href?: string }) {
   return (
-    <Link href={href} aria-label="Reviral home" className="flex items-center gap-2.5 text-left">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy text-sm font-black text-white">Re</span>
-      <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">REVIRAL</span>
+    <Link href={href} aria-label="Reviral home" className="flex items-center gap-2.5 text-left group">
+      <img
+        src="/logo.png"
+        alt="Reviral"
+        className="h-8 md:h-9 w-auto object-contain dark:hidden transition-transform duration-200 group-hover:scale-105"
+      />
+      <img
+        src="/logo-dark.png"
+        alt="Reviral"
+        className="h-8 md:h-9 w-auto object-contain hidden dark:block transition-transform duration-200 group-hover:scale-105"
+      />
     </Link>
   );
 }

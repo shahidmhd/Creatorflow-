@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BriefcaseBusiness, LayoutGrid, LogOut, Menu, Settings, Wallet, X } from "lucide-react";
 import { getAuthSession, clearAuthData } from "../api";
-import { ThemeToggle } from "../components";
+import { ThemeToggle, LogoBrand } from "../components";
 
 const navItems = [
   { label: "Overview", href: "/creator", altHref: "/brand", Icon: LayoutGrid },
@@ -48,10 +48,7 @@ export default function CreatorLayout({ children }: { children: React.ReactNode 
     <div className="min-h-screen bg-surface text-neutral-900 dark:text-white">
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-black/5 dark:border-white/10 bg-white dark:bg-[#0c1829] px-5 py-7 lg:flex">
-        <Link href="/creator" className="flex items-center gap-2.5 text-left">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy text-sm font-black text-white">Re</span>
-          <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">REVIRAL</span>
-        </Link>
+        <LogoBrand href="/creator" />
         <p className="mb-3 mt-8 px-3 text-xs font-bold uppercase tracking-[.18em] text-neutral-400">Brand workspace</p>
         <nav className="space-y-1">
           {navItems.map(({ label, href, altHref, Icon }) => {
@@ -92,10 +89,9 @@ export default function CreatorLayout({ children }: { children: React.ReactNode 
           />
           <aside className="fixed inset-y-0 left-0 z-50 w-72 flex-col border-r border-black/10 dark:border-white/10 bg-white dark:bg-[#0c1829] p-6 shadow-2xl flex">
             <div className="flex items-center justify-between pb-6 border-b border-black/5 dark:border-white/10">
-              <Link href="/creator" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2.5 text-left">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-navy text-sm font-black text-white">Re</span>
-                <span className="text-xl font-black tracking-[-0.08em] text-neutral-900 dark:text-white">REVIRAL</span>
-              </Link>
+              <div onClick={() => setMobileMenuOpen(false)}>
+                <LogoBrand href="/creator" />
+              </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="grid h-8 w-8 place-items-center rounded-full bg-neutral-100 dark:bg-white/10 text-neutral-700 dark:text-white"

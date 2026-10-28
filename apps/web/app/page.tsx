@@ -539,7 +539,7 @@ function HomeContent() {
                 </div>
               </label>
 
-              <button className="w-full rounded-full bg-gradient-to-r from-cyan-500 to-navy py-3 font-bold text-white shadow-cyan-glow hover:opacity-95 transition">
+              <button className="w-full rounded-full bg-gradient-to-r from-cyan-500 to-navy py-3 font-bold text-white hover:opacity-95 transition">
                 {authMode === "create" ? "Join as " : "Sign in as "}
                 {authFlow === "admin" ? "Admin" : authFlow === "editor" ? "Editor" : "Brand"}
               </button>

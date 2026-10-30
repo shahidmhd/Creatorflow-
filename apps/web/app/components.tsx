@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   TrendingUp,
   Video,
+  ArrowRight,
+  Linkedin,
 } from "lucide-react";
 
 export function ThemeToggle() {
@@ -70,7 +72,7 @@ export function PublicNav() {
   const brandRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
-  const links = [["How it works", "/"], ["Pricing", "/"]];
+  const links: [string, string][] = [];
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -120,12 +122,9 @@ export function PublicNav() {
                 setBrandOpen(!brandOpen);
                 setEditorOpen(false);
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-white px-4 py-2 text-sm font-semibold text-navy shadow-sm transition hover:border-navy/40 hover:bg-neutral-50 active:scale-[0.99] dark:border-white/15 dark:bg-white/5 dark:text-white"
+              className="inline-flex items-center gap-1 px-3 py-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-neutral-950 dark:text-neutral-200 dark:hover:text-white transition"
               aria-expanded={brandOpen}
             >
-              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#64748b] text-[11px] font-black text-white">
-                B
-              </span>
               <span>Brand Sign In</span>
               <ChevronDown
                 size={14}
@@ -172,15 +171,11 @@ export function PublicNav() {
                 setEditorOpen(!editorOpen);
                 setBrandOpen(false);
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy/90 active:scale-[0.99]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#0c142b] hover:bg-[#142045] px-4 py-2 text-xs font-bold text-white shadow-md transition active:scale-[0.99] dark:bg-white dark:text-[#0c142b]"
               aria-expanded={editorOpen}
             >
-              <Pencil size={13} className="shrink-0 text-white" />
               <span>Editor Sign In</span>
-              <ChevronDown
-                size={14}
-                className={`text-white/80 transition-transform duration-200 ${editorOpen ? "rotate-180" : ""}`}
-              />
+              <ArrowRight size={13} className="shrink-0" />
             </button>
 
             {editorOpen && (
@@ -229,13 +224,6 @@ export function PublicNav() {
         <div className="container pb-5 md:hidden">
           <nav className="rounded-3xl border border-black/10 bg-white/95 p-5 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0c1829]/95 space-y-4">
             <div className="grid gap-1">
-              <Link
-                onClick={() => setOpen(false)}
-                className="py-2.5 px-3 rounded-xl font-bold text-sm text-neutral-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition"
-                href="/"
-              >
-                How it works
-              </Link>
               <a
                 onClick={() => setOpen(false)}
                 className="py-2.5 px-3 rounded-xl font-bold text-sm text-neutral-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition"
@@ -264,7 +252,7 @@ export function PublicNav() {
                   }}
                   className="inline-flex items-center justify-center gap-1.5 rounded-full border border-black/15 dark:border-white/20 bg-neutral-100 dark:bg-white/10 py-2.5 text-xs font-bold text-neutral-900 dark:text-white hover:bg-neutral-200 dark:hover:bg-white/20 transition shadow-xs"
                 >
-                  <span className="grid h-4 w-4 place-items-center rounded-full bg-[#64748b] text-[9px] text-white">B</span>
+                  <span className="grid h-4 w-4 place-items-center rounded-full bg-[#01173b] text-[9px] text-white">B</span>
                   Sign In
                 </button>
                 <button
@@ -287,9 +275,9 @@ export function PublicNav() {
                     setOpen(false);
                     triggerAuth("editor", "login");
                   }}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-navy py-2.5 text-xs font-bold text-white shadow-cyan-glow hover:opacity-95 transition"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#01173b] via-[#091e42] to-black py-2.5 text-xs font-bold text-white shadow-md hover:opacity-95 transition border border-white/10"
                 >
-                  <Pencil size={12} />
+                  <Pencil size={12} className="text-[#e5e7eb]" />
                   Sign In
                 </button>
                 <button
@@ -310,7 +298,7 @@ export function PublicNav() {
                   setOpen(false);
                   triggerAuth("admin", "login");
                 }}
-                className="text-xs font-bold text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition"
+                className="text-xs font-bold text-neutral-500 hover:text-[#01173b] dark:text-neutral-400 dark:hover:text-[#e5e7eb] transition"
               >
                 Admin Console Access →
               </button>
@@ -324,15 +312,42 @@ export function PublicNav() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-black/5 dark:border-white/5 bg-white dark:bg-[#070b14] transition-colors">
-      <div className="container flex flex-col gap-5 py-10 text-sm text-neutral-600 dark:text-neutral-400 md:flex-row md:items-center md:justify-between">
-        <LogoBrand />
-        <span>© 2026 Reviral. All rights reserved.</span>
-        <div className="flex flex-wrap gap-5 font-semibold text-xs">
-          <Link href="/?auth=creator-login" className="hover:text-navy dark:hover:text-cyan-400 transition">Brand sign in</Link>
-          <Link href="/?auth=creator-create" className="hover:text-navy dark:hover:text-cyan-400 transition">Start a campaign</Link>
-          <Link href="/?auth=editor-create" className="hover:text-navy dark:hover:text-cyan-400 transition">Editor sign in / Join</Link>
-          <Link href="/?auth=admin-login" className="text-neutral-400 hover:text-navy dark:hover:text-cyan-400 transition">Admin Portal</Link>
+    <footer className="border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-[#070b14] transition-colors py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-neutral-500 dark:text-neutral-400">
+        {/* Left: Logo + Copyright */}
+        <div className="flex items-center gap-3">
+          <LogoBrand />
+          <span>© 2026 Reviral. All rights reserved.</span>
+        </div>
+
+        {/* Center: Legal Menu */}
+        <div className="flex items-center gap-6 font-semibold text-neutral-600 dark:text-neutral-400">
+          <Link href="/privacy" className="hover:text-black dark:hover:text-white transition">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-black dark:hover:text-white transition">Terms &amp; Conditions</Link>
+        </div>
+
+        {/* Right: Auth links */}
+        <div className="flex flex-wrap items-center gap-3 font-medium text-neutral-600 dark:text-neutral-400">
+          <Link href="/?auth=creator-login" className="hover:text-black dark:hover:text-white transition">Brand sign in</Link>
+          <span className="text-neutral-300 dark:text-neutral-600">|</span>
+          <Link href="/?auth=creator-create" className="hover:text-black dark:hover:text-white transition">Start a campaign</Link>
+          <span className="text-neutral-300 dark:text-neutral-600">|</span>
+          <Link href="/?auth=editor-create" className="hover:text-black dark:hover:text-white transition">Editor sign in / Join</Link>
+        </div>
+
+        {/* Far Right: Social Icons */}
+        <div className="flex items-center gap-3 text-neutral-700 dark:text-neutral-300">
+          <a href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="X Twitter" className="hover:text-black dark:hover:text-white transition">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+          </a>
+          <a href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube" className="hover:text-red-600 transition">
+            <Youtube size={16} />
+          </a>
+          <a href="https://linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="hover:text-blue-600 transition">
+            <Linkedin size={15} />
+          </a>
         </div>
       </div>
     </footer>
@@ -360,31 +375,31 @@ export function CampaignDummyThumbnail({
   platform?: string;
 }) {
   return (
-    <div className="relative h-full w-full overflow-hidden bg-gradient-to-br from-[#0c1829] via-[#17345c] to-[#0a1626] p-4 flex flex-col justify-between text-white select-none">
+    <div className="relative h-full w-full overflow-hidden bg-gradient-to-br from-[#01173b] via-[#081a38] to-black p-4 flex flex-col justify-between text-white select-none">
       <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider backdrop-blur-md text-white/90">
-          <Sparkles size={11} className="text-amber-400" /> {category || "Campaign"}
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider backdrop-blur-md text-white/90 border border-white/10">
+          <Sparkles size={11} className="text-[#e5e7eb]" /> {category || "Campaign"}
         </span>
-        <div className="h-6 w-6 rounded-full bg-white/10 grid place-items-center backdrop-blur-md">
+        <div className="h-6 w-6 rounded-full bg-white/10 grid place-items-center backdrop-blur-md border border-white/10">
           {platform === "YouTube" ? (
-            <span className="text-red-400 font-black text-[11px]">▶</span>
+            <span className="text-white font-black text-[11px]">▶</span>
           ) : (
-            <span className="text-pink-400 font-black text-[11px]">📸</span>
+            <span className="text-white font-black text-[11px]">📸</span>
           )}
         </div>
       </div>
 
       <div className="my-auto text-center px-2 py-4">
         <div className="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md shadow-inner text-white font-black text-sm">
-          CF
+          Re
         </div>
-        <p className="text-xs font-black line-clamp-1 tracking-tight text-white/90">{title || "CreatorFlow Campaign"}</p>
-        <p className="text-[10px] text-white/50 tracking-wider uppercase mt-0.5 font-bold">Verified Brief</p>
+        <p className="text-xs font-black line-clamp-1 tracking-tight text-white/90">{title || "Reviral Campaign"}</p>
+        <p className="text-[10px] text-[#e5e7eb]/70 tracking-wider uppercase mt-0.5 font-bold">Verified Brief</p>
       </div>
 
-      <div className="flex items-center justify-between text-[10px] font-semibold text-white/40 border-t border-white/10 pt-2">
-        <span>CREATORFLOW</span>
-        <span className="text-emerald-400 font-bold">Active Payout</span>
+      <div className="flex items-center justify-between text-[10px] font-semibold text-white/50 border-t border-white/10 pt-2">
+        <span>REVIRAL</span>
+        <span className="text-[#e5e7eb] font-bold">Active Payout</span>
       </div>
     </div>
   );
@@ -446,11 +461,11 @@ export function CampaignCard({
   return (
     <Link
       href={targetLink}
-      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-navy/10 bg-white p-3.5 shadow-xs hover:border-navy/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 dark:border-white/10 dark:bg-[#0e1626] dark:hover:border-cyan-500/40"
+      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white p-3.5 shadow-xs hover:border-[#01173b]/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 dark:border-white/10 dark:bg-[#071329] dark:hover:border-white/20"
     >
       <div>
         {/* 16:9 Thumbnail or Dummy Image */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900 border border-navy/5">
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900 border border-[#e5e7eb] dark:border-white/10">
           {campaign.thumbnail && !imgError ? (
             <img
               src={campaign.thumbnail}
@@ -467,15 +482,15 @@ export function CampaignCard({
           )}
 
           {/* Platform Badge Overlay with Lucide Icons */}
-          <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/75 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-md border border-white/10 shadow-xs">
+          <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-md border border-[#e5e7eb]/20 shadow-xs">
             {campaign.socialPlatform === "YouTube" ? (
               <span className="flex items-center gap-1.5 text-white">
-                <Youtube size={13} className="text-red-500 fill-red-500" />
+                <Youtube size={13} className="text-white fill-current" />
                 <span>YouTube</span>
               </span>
             ) : (
               <span className="flex items-center gap-1.5 text-white">
-                <Instagram size={13} className="text-pink-400" />
+                <Instagram size={13} className="text-[#e5e7eb]" />
                 <span>Instagram</span>
               </span>
             )}
@@ -483,8 +498,8 @@ export function CampaignCard({
 
           {/* Raw Footage Indicator Badge */}
           {campaign.videoUrl && (
-            <div className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-full bg-navy/85 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md border border-white/10 shadow-xs">
-              <Video size={11} className="text-sky-300" />
+            <div className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-full bg-[#01173b]/90 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md border border-white/20 shadow-xs">
+              <Video size={11} className="text-[#e5e7eb]" />
               <span>Footage Ready</span>
             </div>
           )}
@@ -493,44 +508,44 @@ export function CampaignCard({
         {/* Creator Info Row */}
         <div className="mt-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-navy text-[10px] font-black text-white dark:bg-cyan-500 dark:text-neutral-950">
-              {campaign.creator?.name?.slice(0, 2).toUpperCase() || "CF"}
+            <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#01173b] text-[10px] font-black text-white dark:bg-white dark:text-[#01173b]">
+              {campaign.creator?.name?.slice(0, 2).toUpperCase() || "RE"}
             </div>
             <div className="min-w-0 flex items-center gap-1">
-              <span className="truncate text-xs font-bold text-neutral-800 dark:text-neutral-200">
+              <span className="truncate text-xs font-bold text-neutral-900 dark:text-neutral-100">
                 {campaign.creator?.name || "Creator"}
               </span>
               <span title="Verified Creator" className="inline-flex shrink-0">
-                <CheckCircle2 size={13} className="text-sky-500 fill-sky-500/20" />
+                <CheckCircle2 size={13} className="text-[#01173b] dark:text-sky-300" />
               </span>
             </div>
           </div>
-          <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:bg-white/10 dark:text-neutral-300">
+          <span className="rounded-md border border-[#e5e7eb] bg-[#e5e7eb]/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-700 dark:border-white/10 dark:bg-white/5 dark:text-[#e5e7eb]">
             {campaign.category}
           </span>
         </div>
 
         {/* Campaign Title */}
-        <h3 className="mt-2.5 line-clamp-2 text-sm font-black tracking-tight text-neutral-900 group-hover:text-navy dark:text-white dark:group-hover:text-cyan-400 transition leading-snug">
+        <h3 className="mt-2.5 line-clamp-2 text-sm font-black tracking-tight text-neutral-900 group-hover:text-[#01173b] dark:text-white dark:group-hover:text-sky-300 transition leading-snug">
           {campaign.title}
         </h3>
       </div>
 
       {/* Financials & Slot Metrics Footer */}
-      <div className="mt-4 border-t border-navy/5 pt-3 space-y-2.5">
+      <div className="mt-4 border-t border-[#e5e7eb] dark:border-white/10 pt-3 space-y-2.5">
         <div className="flex items-center justify-between text-xs">
           <div>
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-[#e5e7eb]">
               Max Payout
             </span>
-            <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+            <span className="text-sm font-black text-[#01173b] dark:text-white">
               ₹{maxEarningMajor.toLocaleString("en-IN")}
             </span>
           </div>
 
           <div className="text-right">
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30">
-              <TrendingUp size={11} className="shrink-0" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#01173b]/10 px-2.5 py-1 text-[11px] font-extrabold text-[#01173b] border border-[#01173b]/20 dark:bg-white/10 dark:text-white dark:border-white/15">
+              <TrendingUp size={11} className="shrink-0 text-[#01173b] dark:text-[#e5e7eb]" />
               <span>₹{rateVal} / 1k</span>
             </span>
           </div>
@@ -540,21 +555,21 @@ export function CampaignCard({
         <div className="space-y-1.5 pt-0.5">
           <div className="flex items-center justify-between text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
             <span className="flex items-center gap-1.5">
-              <Users size={12} className="text-navy dark:text-cyan-400 shrink-0" />
-              <span className={remaining === 0 ? "text-red-500 font-bold" : "text-neutral-700 dark:text-neutral-200"}>
+              <Users size={12} className="text-[#01173b] dark:text-sky-300 shrink-0" />
+              <span className={remaining === 0 ? "text-black dark:text-white font-bold" : "text-neutral-700 dark:text-neutral-200"}>
                 {remaining === 0 ? "Slots full" : `${remaining} of ${totalSlots} slots left`}
               </span>
             </span>
             {campaign.minimumViews && campaign.minimumViews > 0 ? (
-              <span className="text-[10px] text-neutral-400">
+              <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
                 Min {campaign.minimumViews.toLocaleString()} views
               </span>
             ) : null}
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-white/10">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#e5e7eb] dark:bg-white/10">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
-                remaining === 0 ? "bg-red-500" : "bg-navy dark:bg-cyan-500"
+                remaining === 0 ? "bg-black dark:bg-white" : "bg-[#01173b] dark:bg-white"
               }`}
               style={{ width: `${percentFilled}%` }}
             />

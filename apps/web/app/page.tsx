@@ -15,13 +15,16 @@ import {
   Sparkles,
   TrendingUp,
   ChevronDown,
+  Play,
 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { Footer, PublicNav, CampaignCard, CampaignCardData } from "./components";
 import { authApi, api, UserSession, setAuthData } from "./api";
-import { NeuralBackground } from "./landing-components/NeuralBackground";
-import { FloatingSocialBadges } from "./landing-components/FloatingSocialBadges";
-import { HeroThreeStepWorkflow } from "./landing-components/HeroThreeStepWorkflow";
+import { HeroSectionExact } from "./landing-components/HeroSectionExact";
+import { WorkflowStepCards } from "./landing-components/WorkflowStepCards";
+import { OpenCampaignsBanner } from "./landing-components/OpenCampaignsBanner";
+import { SplitAudienceCards } from "./landing-components/SplitAudienceCards";
+import { FaqSectionExact } from "./landing-components/FaqSectionExact";
 
 /* ─── Fallback campaign data ─────────────────────────────── */
 const fallbackCampaigns: CampaignCardData[] = [
@@ -229,190 +232,73 @@ function HomeContent() {
   };
 
   return (
-    <div className="relative min-h-screen bg-paper dark:bg-[#070b14] text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
+    <div className="relative min-h-screen bg-[#f8f9fb] dark:bg-[#070b14] text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
       <PublicNav />
 
       <main className="relative overflow-hidden">
         {/* ══════════════════════════════════════════════════
-            HERO SECTION WITH NEURAL BACKGROUND & 3-STEP PIPELINE
+            1. HERO SECTION (REFERENCE EXACT)
         ══════════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden px-4 sm:px-6 py-16 md:py-24 border-b border-black/5 dark:border-white/5">
-          {/* Animated Neural Synapse Canvas Background */}
-          <NeuralBackground />
-
-          {/* Floating 3D Instagram & YouTube Badges */}
-          <FloatingSocialBadges />
-
-          <div className="container relative z-10 max-w-6xl mx-auto text-center">
-            {/* Pill Header Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-extrabold tracking-wide text-cyan-700 dark:text-cyan-400 mb-6 backdrop-blur-md">
-              <Sparkles size={14} className="text-cyan-500" />
-              Long videos in. Short clips out.
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4rem] font-black leading-[1.04] tracking-[-0.04em] text-neutral-900 dark:text-white max-w-4xl mx-auto">
-              Every great <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-cyan-500 via-sky-400 to-violet-500 bg-clip-text text-transparent">
-                moment deserves a second life
-              </span>
-            </h1>
-
-            {/* Subheading */}
-            <p className="mt-5 text-base sm:text-lg md:text-xl leading-relaxed text-neutral-600 dark:text-neutral-200 max-w-2xl mx-auto font-medium">
-              Got a long video, like a podcast or a talk? Editors on Reviral cut it into short clips and post them online. You set a budget and pay only for the views those clips really get.
-            </p>
-
-            {/* Primary Action Buttons */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/?auth=creator-create"
-                id="cta-footage"
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-navy px-8 py-4 text-sm font-black text-white hover:opacity-95 active:scale-[0.98] transition-all"
-              >
-                Launch Campaign <ArrowRight size={16} />
-              </Link>
-              <Link
-                href="/?auth=editor-create"
-                id="cta-edit"
-                className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/80 dark:border-white/10 dark:bg-white/5 px-8 py-4 text-sm font-black text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/10 active:scale-[0.98] transition-all backdrop-blur-md"
-              >
-                Start Editing
-              </Link>
-            </div>
-
-            {/* Trust Badges Row */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-y-2 gap-x-8 text-xs font-bold text-neutral-600 dark:text-neutral-300">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={16} className="text-emerald-500" />
-                <span>100% Verified Views</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <IndianRupee size={15} className="text-cyan-500" />
-                <span>85% Editor Payouts</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck size={16} className="text-violet-500" />
-                <span>Escrow Protection</span>
-              </div>
-            </div>
-
-            {/* ─── 3-STEP WORKFLOW PIPELINE CARDS ───────────── */}
-            <HeroThreeStepWorkflow />
-          </div>
-        </section>
+        <HeroSectionExact />
 
         {/* ══════════════════════════════════════════════════
-            LIVE CAMPAIGNS MARKETPLACE
+            2. 3-STEP WORKFLOW CARDS: 01, 02, 03
         ══════════════════════════════════════════════════ */}
-        <section className="py-20 md:py-28 border-b border-black/5 dark:border-white/5">
-          <div className="container max-w-7xl mx-auto">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-10">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[.2em] text-cyan-600 dark:text-cyan-400 mb-1">Live Marketplace</p>
-                <h2 className="text-3xl sm:text-4xl font-black tracking-[-0.05em] text-neutral-900 dark:text-white">
-                  Open Campaigns
-                </h2>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-                  Apply, edit, post, and earn from real verified views.
-                </p>
-              </div>
-              <Link
-                href="/?auth=editor-create"
-                className="text-xs font-bold text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 hover:underline flex items-center gap-1"
-              >
-                Browse all campaigns <ArrowRight size={13} />
-              </Link>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {campaigns.map((camp) => (
-                <CampaignCard key={camp.id} campaign={camp} />
-              ))}
-            </div>
-          </div>
-        </section>
+        <div id="how-it-works">
+          <WorkflowStepCards />
+        </div>
 
         {/* ══════════════════════════════════════════════════
-            DUAL CALL TO ACTION
+            3. LIVE MARKETPLACE: OPEN CAMPAIGNS & CAMPAIGNS LIST
         ══════════════════════════════════════════════════ */}
-        <section className="py-20 md:py-28 border-b border-black/5 dark:border-white/5">
-          <div className="container max-w-6xl mx-auto">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* For Brands */}
-              <div id="for-brands" className="rounded-3xl bg-gradient-to-br from-navy via-navy-strong to-[#081220] p-8 md:p-10 text-white shadow-xl relative overflow-hidden">
-                <div className="absolute right-0 top-0 h-40 w-40 bg-cyan-500/10 blur-3xl rounded-full pointer-events-none" />
-                <p className="text-[11px] font-black uppercase tracking-[.2em] text-cyan-400 mb-3">For Brands & Creators</p>
-                <h3 className="text-2xl sm:text-3xl font-black tracking-[-0.04em] mb-4">
-                  Pay only for views that actually happen.
-                </h3>
-                <p className="text-sm leading-relaxed text-white/70 mb-8 max-w-md">
-                  Put your long-form videos in front of hundreds of talented editors. If a clip gets no views, it costs you nothing.
-                </p>
-                <Link
-                  href="/?auth=creator-create"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-xs font-black text-navy shadow-md hover:bg-neutral-100 transition"
-                >
-                  Start a campaign <ArrowRight size={14} />
-                </Link>
-              </div>
+        <section id="campaigns" className="py-10 lg:py-16 bg-[#f8f9fb] dark:bg-[#070b14] transition-colors">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            {/* Open Campaigns Banner */}
+            <OpenCampaignsBanner />
 
-              {/* For Editors */}
-              <div id="for-creators" className="glass-card rounded-3xl p-8 md:p-10 shadow-xl relative overflow-hidden">
-                <div className="absolute right-0 top-0 h-40 w-40 bg-violet-500/10 blur-3xl rounded-full pointer-events-none" />
-                <p className="text-[11px] font-black uppercase tracking-[.2em] text-violet-600 dark:text-violet-400 mb-3">For Editors & Clippers</p>
-                <h3 className="text-2xl sm:text-3xl font-black tracking-[-0.04em] text-neutral-900 dark:text-white mb-4">
-                  Turn your editing skill into steady income.
-                </h3>
-                <p className="text-sm leading-relaxed text-neutral-500 dark:text-neutral-400 mb-8 max-w-md">
-                  Pick a campaign in your favorite niche, cut, post, and watch verified earnings deposit straight into your wallet.
-                </p>
+            {/* Live Campaign Cards Grid */}
+            <div>
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 dark:text-white">
+                    Live Open Campaigns
+                  </h3>
+                  <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-1 font-medium">
+                    Select a brief, download raw footage, and earn verified view payouts.
+                  </p>
+                </div>
                 <Link
                   href="/?auth=editor-create"
-                  className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-6 py-3 text-xs font-black text-neutral-900 shadow-sm hover:bg-neutral-50 dark:border-white/10 dark:bg-white/10 dark:text-white transition"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline shrink-0"
                 >
-                  Start earning <ArrowRight size={14} />
+                  <span>Browse all campaigns ({campaigns.length})</span>
+                  <ArrowRight size={13} />
                 </Link>
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {campaigns.map((camp) => (
+                  <CampaignCard key={camp.id} campaign={camp} />
+                ))}
               </div>
             </div>
           </div>
         </section>
 
         {/* ══════════════════════════════════════════════════
-            FAQ SECTION
+            4. FOR BRANDS & CREATORS / FOR EDITORS & CLIPPERS
         ══════════════════════════════════════════════════ */}
-        <section className="py-20 md:py-28">
-          <div className="container max-w-2xl mx-auto">
-            <p className="text-center text-xs font-black uppercase tracking-[.2em] text-neutral-400 mb-2">Questions</p>
-            <h2 className="text-center text-3xl sm:text-4xl font-black tracking-[-0.05em] mb-10 text-neutral-900 dark:text-white">
-              Frequently Asked Questions.
-            </h2>
-            <div className="space-y-3">
-              {faqs.map((faq, i) => (
-                <div
-                  key={i}
-                  className="glass-card rounded-2xl overflow-hidden transition"
-                >
-                  <button
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between px-6 py-4 text-left font-bold text-neutral-900 dark:text-white text-sm hover:bg-black/5 dark:hover:bg-white/5 transition"
-                  >
-                    {faq.q}
-                    <span className={`ml-4 shrink-0 transition-transform duration-200 text-neutral-400 ${openFaq === i ? "rotate-180" : ""}`}>
-                      <ChevronDown size={16} />
-                    </span>
-                  </button>
-                  {openFaq === i && (
-                    <p className="px-6 pb-5 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400 border-t border-black/5 dark:border-white/5 pt-3">
-                      {faq.a}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <SplitAudienceCards />
+
+        {/* ══════════════════════════════════════════════════
+            5. FREQUENTLY ASKED QUESTIONS
+        ══════════════════════════════════════════════════ */}
+        <div id="pricing">
+          <FaqSectionExact />
+        </div>
       </main>
+
+      <Footer />
 
       {/* ══════════════════════════════════════════════════
           AUTHENTICATION MODAL
@@ -429,10 +315,10 @@ function HomeContent() {
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-md"
         >
-          <div className="glass-card w-full max-w-md rounded-[28px] p-6 shadow-2xl ring-1 ring-white/10 dark:bg-[#0c1829]">
+          <div className="glass-card w-full max-w-md rounded-[28px] p-6 shadow-2xl ring-1 ring-black/5 dark:ring-white/10 dark:bg-[#0c1829]">
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[.2em] text-cyan-600 dark:text-cyan-400">Reviral access</p>
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-blue-600 dark:text-blue-400">Reviral access</p>
                 <h3 className="mt-1 text-2xl font-black tracking-[-0.05em] text-neutral-900 dark:text-white">
                   {authFlow === "admin" ? "Admin" : authFlow === "editor" ? "Editor" : "Brand"}{" "}
                   {authMode === "create" ? "Sign up" : "Sign in"}
@@ -445,7 +331,7 @@ function HomeContent() {
                     window.history.replaceState(null, "", window.location.pathname);
                   }
                 }}
-                className="rounded-full bg-neutral-100 dark:bg-white/10 p-2 text-neutral-600 dark:text-white hover:bg-neutral-200 dark:hover:bg-white/20 transition"
+                className="rounded-full bg-neutral-100 dark:bg-white/10 p-2 text-neutral-700 dark:text-white hover:bg-neutral-200 dark:hover:bg-white/20 transition"
               >
                 <X size={16} />
               </button>
@@ -456,7 +342,7 @@ function HomeContent() {
                 <button
                   type="button"
                   className={`flex-1 rounded-full px-3 py-1.5 transition-all ${authMode === "login"
-                    ? "bg-white dark:bg-[#152a45] text-neutral-900 dark:text-white shadow font-bold"
+                    ? "bg-[#0a1128] text-white shadow font-bold dark:bg-white dark:text-black"
                     : "hover:text-neutral-900 dark:hover:text-white"
                     }`}
                   onClick={() => { setAuthMode("login"); setAuthNotice(""); }}
@@ -466,7 +352,7 @@ function HomeContent() {
                 <button
                   type="button"
                   className={`flex-1 rounded-full px-3 py-1.5 transition-all ${authMode === "create"
-                    ? "bg-white dark:bg-[#152a45] text-neutral-900 dark:text-white shadow font-bold"
+                    ? "bg-[#0a1128] text-white shadow font-bold dark:bg-white dark:text-black"
                     : "hover:text-neutral-900 dark:hover:text-white"
                     }`}
                   onClick={() => { setAuthMode("create"); setAuthNotice(""); }}
@@ -486,8 +372,8 @@ function HomeContent() {
               {authMode === "create" && (
                 <label className="block">
                   <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">Email</span>
-                  <div className="flex items-center gap-2 rounded-xl border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-3 py-2.5">
-                    <Mail className="text-neutral-400" size={16} />
+                  <div className="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-3 py-2.5">
+                    <Mail className="text-blue-600 dark:text-blue-400" size={16} />
                     <input
                       required
                       type="email"
@@ -502,8 +388,8 @@ function HomeContent() {
 
               <label className="block">
                 <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">Username</span>
-                <div className="flex items-center gap-2 rounded-xl border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-3 py-2.5">
-                  <CircleUserRound className="text-neutral-400" size={16} />
+                <div className="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-3 py-2.5">
+                  <CircleUserRound className="text-blue-600 dark:text-blue-400" size={16} />
                   <input
                     required
                     value={form.username}
@@ -516,8 +402,8 @@ function HomeContent() {
 
               <label className="block">
                 <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">Password</span>
-                <div className="flex items-center gap-2 rounded-xl border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-3 py-2.5">
-                  <ShieldCheck className="text-neutral-400" size={16} />
+                <div className="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-3 py-2.5">
+                  <ShieldCheck className="text-blue-600 dark:text-blue-400" size={16} />
                   <input
                     required
                     type="password"
@@ -529,7 +415,7 @@ function HomeContent() {
                 </div>
               </label>
 
-              <button className="w-full rounded-full bg-gradient-to-r from-cyan-500 to-navy py-3 font-bold text-white hover:opacity-95 transition">
+              <button className="w-full rounded-full bg-[#0a1128] hover:bg-[#101c3b] dark:bg-white dark:text-neutral-950 py-3 font-bold text-white transition shadow-lg">
                 {authMode === "create" ? "Join as " : "Sign in as "}
                 {authFlow === "admin" ? "Admin" : authFlow === "editor" ? "Editor" : "Brand"}
               </button>
@@ -537,8 +423,6 @@ function HomeContent() {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 }

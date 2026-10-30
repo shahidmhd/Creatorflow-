@@ -56,18 +56,18 @@ export function NeuralBackground() {
 
       ctx.clearRect(0, 0, width, height);
 
-      // Colors configuration
-      const cyanStroke = isDark ? "rgba(0, 240, 255, 0.22)" : "rgba(2, 132, 199, 0.15)";
-      const violetStroke = isDark ? "rgba(139, 92, 246, 0.22)" : "rgba(99, 102, 241, 0.15)";
-      const cyanGlow = isDark ? "rgba(0, 240, 255, 0.75)" : "rgba(2, 132, 199, 0.45)";
-      const violetGlow = isDark ? "rgba(139, 92, 246, 0.75)" : "rgba(99, 102, 241, 0.45)";
+      // Colors configuration: Dark Blue (#01173b), Silver (#e5e7eb), White & Black
+      const darkBlueStroke = isDark ? "rgba(56, 189, 248, 0.20)" : "rgba(1, 23, 59, 0.12)";
+      const silverStroke = isDark ? "rgba(229, 231, 235, 0.16)" : "rgba(100, 116, 139, 0.16)";
+      const darkBlueGlow = isDark ? "rgba(56, 189, 248, 0.75)" : "rgba(1, 23, 59, 0.65)";
+      const silverGlow = isDark ? "rgba(255, 255, 255, 0.85)" : "rgba(100, 116, 139, 0.55)";
 
       // Draw sweeping neural sine spline curves
       const waveCount = 5;
       for (let w = 0; w < waveCount; w++) {
         ctx.beginPath();
         ctx.lineWidth = w === 0 || w === 2 ? 1.75 : 1;
-        ctx.strokeStyle = w % 2 === 0 ? cyanStroke : violetStroke;
+        ctx.strokeStyle = w % 2 === 0 ? darkBlueStroke : silverStroke;
 
         const yOffset = (height / (waveCount + 1)) * (w + 1);
         const amplitude = 35 + w * 12;
@@ -106,7 +106,7 @@ export function NeuralBackground() {
             const alpha = (1 - dist / 180) * (isDark ? 0.28 : 0.16);
             ctx.beginPath();
             ctx.lineWidth = 0.85;
-            ctx.strokeStyle = node.colorIndex === 0 ? `rgba(0, 240, 255, ${alpha})` : `rgba(139, 92, 246, ${alpha})`;
+            ctx.strokeStyle = node.colorIndex === 0 ? (isDark ? `rgba(56, 189, 248, ${alpha})` : `rgba(1, 23, 59, ${alpha})`) : `rgba(229, 231, 235, ${alpha * 0.8})`;
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(other.x, other.y);
             ctx.stroke();
@@ -117,8 +117,8 @@ export function NeuralBackground() {
         const pulse = Math.sin(time * 3 + node.phase) * 0.4 + 0.8;
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius * pulse, 0, Math.PI * 2);
-        ctx.fillStyle = node.colorIndex === 0 ? cyanGlow : violetGlow;
-        ctx.shadowColor = node.colorIndex === 0 ? cyanGlow : violetGlow;
+        ctx.fillStyle = node.colorIndex === 0 ? darkBlueGlow : silverGlow;
+        ctx.shadowColor = node.colorIndex === 0 ? darkBlueGlow : silverGlow;
         ctx.shadowBlur = isDark ? 12 : 4;
         ctx.fill();
         ctx.shadowBlur = 0; // reset

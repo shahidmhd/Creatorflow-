@@ -312,7 +312,7 @@ export function PublicNav() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-[#070b14] transition-colors py-8">
+    <footer className="border-t border-neutral-200/80 dark:border-white/10 bg-transparent backdrop-blur-xs transition-colors py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-neutral-500 dark:text-neutral-400">
         {/* Left: Logo + Copyright */}
         <div className="flex items-center gap-3">

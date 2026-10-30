@@ -22,6 +22,19 @@ export function NeuralBackground() {
     };
     window.addEventListener("resize", handleResize);
 
+    // Mouse tracking for interactive neural connections
+    const mouse = { x: -1000, y: -1000, radius: 180 };
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+    const handleMouseLeave = () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseleave", handleMouseLeave);
+
     // Synapse Nodes
     interface SynapseNode {
       x: number;
@@ -30,21 +43,23 @@ export function NeuralBackground() {
       vy: number;
       radius: number;
       phase: number;
+      pulseSpeed: number;
       colorIndex: number;
     }
 
-    const nodeCount = Math.min(24, Math.floor(width / 50));
+    const nodeCount = Math.min(54, Math.max(28, Math.floor(width / 32)));
     const nodes: SynapseNode[] = [];
 
     for (let i = 0; i < nodeCount; i++) {
       nodes.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: (Math.random() - 0.5) * 0.45,
-        radius: Math.random() * 2.5 + 2,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 2.5 + 2.0,
         phase: Math.random() * Math.PI * 2,
-        colorIndex: i % 2,
+        pulseSpeed: Math.random() * 0.02 + 0.015,
+        colorIndex: i % 3,
       });
     }
 
@@ -56,72 +71,118 @@ export function NeuralBackground() {
 
       ctx.clearRect(0, 0, width, height);
 
-      // Colors configuration: Dark Blue (#01173b), Silver (#e5e7eb), White & Black
-      const darkBlueStroke = isDark ? "rgba(56, 189, 248, 0.20)" : "rgba(1, 23, 59, 0.12)";
-      const silverStroke = isDark ? "rgba(229, 231, 235, 0.16)" : "rgba(100, 116, 139, 0.16)";
-      const darkBlueGlow = isDark ? "rgba(56, 189, 248, 0.75)" : "rgba(1, 23, 59, 0.65)";
-      const silverGlow = isDark ? "rgba(255, 255, 255, 0.85)" : "rgba(100, 116, 139, 0.55)";
+      // Colors configuration: Electric Cyan, Royal Blue & Silver/Slate
+      const cyanStroke = isDark ? "rgba(56, 189, 248, 0.22)" : "rgba(2, 132, 199, 0.18)";
+      const blueStroke = isDark ? "rgba(99, 102, 241, 0.18)" : "rgba(30, 41, 59, 0.14)";
+      const silverStroke = isDark ? "rgba(226, 232, 240, 0.18)" : "rgba(100, 116, 139, 0.16)";
 
-      // Draw sweeping neural sine spline curves
-      const waveCount = 5;
+      // 1. Draw flowing neural sine waves
+      const waveCount = 4;
       for (let w = 0; w < waveCount; w++) {
         ctx.beginPath();
-        ctx.lineWidth = w === 0 || w === 2 ? 1.75 : 1;
-        ctx.strokeStyle = w % 2 === 0 ? darkBlueStroke : silverStroke;
+        ctx.lineWidth = w === 1 ? 1.75 : 1.2;
+        ctx.strokeStyle = w % 2 === 0 ? cyanStroke : blueStroke;
 
         const yOffset = (height / (waveCount + 1)) * (w + 1);
-        const amplitude = 35 + w * 12;
-        const speed = time * (0.8 + w * 0.15);
+        const amplitude = 34 + w * 14;
+        const speed = time * (0.7 + w * 0.12);
 
         ctx.moveTo(0, yOffset + Math.sin(speed) * amplitude);
 
-        for (let x = 0; x <= width; x += 40) {
+        for (let x = 0; x <= width; x += 35) {
           const y =
             yOffset +
-            Math.sin(x * 0.003 + speed) * amplitude +
-            Math.cos(x * 0.0015 - speed * 0.7) * (amplitude * 0.4);
+            Math.sin(x * 0.0025 + speed) * amplitude +
+            Math.cos(x * 0.0012 - speed * 0.6) * (amplitude * 0.35);
           ctx.lineTo(x, y);
         }
         ctx.stroke();
       }
 
-      // Update and draw connecting synapse nodes
+      // 2. Update and draw floating neural nodes & connections
+      const maxConnectDist = 175;
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         node.x += node.vx;
         node.y += node.vy;
 
-        // Bounce from edges
-        if (node.x < 0 || node.x > width) node.vx *= -1;
-        if (node.y < 0 || node.y > height) node.vy *= -1;
+        // Wrap around edges smoothly
+        if (node.x < -10) node.x = width + 10;
+        else if (node.x > width + 10) node.x = -10;
+        if (node.y < -10) node.y = height + 10;
+        else if (node.y > height + 10) node.y = -10;
 
-        // Draw connections to nearby nodes
+        // Draw connections between nodes
         for (let j = i + 1; j < nodes.length; j++) {
           const other = nodes[j];
           const dx = other.x - node.x;
           const dy = other.y - node.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 180) {
-            const alpha = (1 - dist / 180) * (isDark ? 0.28 : 0.16);
+          if (dist < maxConnectDist) {
+            const alpha = (1 - dist / maxConnectDist) * (isDark ? 0.36 : 0.24);
             ctx.beginPath();
-            ctx.lineWidth = 0.85;
-            ctx.strokeStyle = node.colorIndex === 0 ? (isDark ? `rgba(56, 189, 248, ${alpha})` : `rgba(1, 23, 59, ${alpha})`) : `rgba(229, 231, 235, ${alpha * 0.8})`;
+            ctx.lineWidth = 0.95;
+            ctx.strokeStyle =
+              node.colorIndex === 0
+                ? isDark
+                  ? `rgba(56, 189, 248, ${alpha})`
+                  : `rgba(2, 132, 199, ${alpha})`
+                : node.colorIndex === 1
+                ? isDark
+                  ? `rgba(168, 85, 247, ${alpha})`
+                  : `rgba(99, 102, 241, ${alpha})`
+                : isDark
+                ? `rgba(255, 255, 255, ${alpha * 0.85})`
+                : `rgba(100, 116, 139, ${alpha})`;
+
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(other.x, other.y);
             ctx.stroke();
           }
         }
 
-        // Draw node pulse
-        const pulse = Math.sin(time * 3 + node.phase) * 0.4 + 0.8;
+        // Draw interactive connection to mouse cursor
+        const mdx = mouse.x - node.x;
+        const mdy = mouse.y - node.y;
+        const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+        if (mDist < mouse.radius) {
+          const mAlpha = (1 - mDist / mouse.radius) * (isDark ? 0.55 : 0.38);
+          ctx.beginPath();
+          ctx.lineWidth = 1.35;
+          ctx.strokeStyle = isDark
+            ? `rgba(56, 189, 248, ${mAlpha})`
+            : `rgba(2, 132, 199, ${mAlpha})`;
+          ctx.moveTo(node.x, node.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.stroke();
+        }
+
+        // Draw pulsing neural node
+        node.phase += node.pulseSpeed;
+        const pulse = Math.sin(node.phase) * 0.35 + 0.95;
+        const currentRadius = node.radius * pulse;
+
+        const nodeColor =
+          node.colorIndex === 0
+            ? isDark
+              ? "rgba(56, 189, 248, 0.95)"
+              : "rgba(2, 132, 199, 0.9)"
+            : node.colorIndex === 1
+            ? isDark
+              ? "rgba(168, 85, 247, 0.95)"
+              : "rgba(99, 102, 241, 0.9)"
+            : isDark
+            ? "rgba(255, 255, 255, 1.0)"
+            : "rgba(15, 23, 42, 0.85)";
+
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius * pulse, 0, Math.PI * 2);
-        ctx.fillStyle = node.colorIndex === 0 ? darkBlueGlow : silverGlow;
-        ctx.shadowColor = node.colorIndex === 0 ? darkBlueGlow : silverGlow;
-        ctx.shadowBlur = isDark ? 12 : 4;
+        ctx.arc(node.x, node.y, currentRadius, 0, Math.PI * 2);
+        ctx.fillStyle = nodeColor;
+        ctx.shadowColor = nodeColor;
+        ctx.shadowBlur = isDark ? 12 : 5;
         ctx.fill();
-        ctx.shadowBlur = 0; // reset
+        ctx.shadowBlur = 0;
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -131,6 +192,8 @@ export function NeuralBackground() {
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -138,7 +201,7 @@ export function NeuralBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-90 transition-opacity duration-500"
+      className="pointer-events-none fixed inset-0 z-0 h-full w-full transition-opacity duration-500"
       aria-hidden="true"
     />
   );

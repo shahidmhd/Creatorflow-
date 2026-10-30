@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2, TrendingUp, ShieldCheck, Play, Eye, Music } f
 
 export function HeroSectionExact() {
   return (
-    <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-16 bg-[#f8f9fb] dark:bg-[#070b14] transition-colors">
+    <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-16 bg-transparent transition-colors">
       {/* Subtle Ambient Radial Gradients */}
       <div className="pointer-events-none absolute -left-20 top-0 h-[460px] w-[460px] rounded-full bg-gradient-to-br from-blue-100/50 to-indigo-100/30 blur-3xl dark:from-blue-900/15 dark:to-indigo-900/10" />
       <div className="pointer-events-none absolute right-0 top-10 h-[500px] w-[500px] rounded-full bg-gradient-to-bl from-purple-100/60 to-pink-100/25 blur-3xl dark:from-purple-900/15 dark:to-pink-900/10" />

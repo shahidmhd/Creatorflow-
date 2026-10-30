@@ -35,7 +35,7 @@ export function FaqSectionExact() {
   };
 
   return (
-    <section className="py-12 lg:py-20 bg-[#f8f9fb] dark:bg-[#070b14] transition-colors">
+    <section className="py-12 lg:py-20 bg-transparent transition-colors">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 mb-2">

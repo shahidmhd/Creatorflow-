@@ -25,6 +25,7 @@ import { WorkflowStepCards } from "./landing-components/WorkflowStepCards";
 import { OpenCampaignsBanner } from "./landing-components/OpenCampaignsBanner";
 import { SplitAudienceCards } from "./landing-components/SplitAudienceCards";
 import { FaqSectionExact } from "./landing-components/FaqSectionExact";
+import { NeuralBackground } from "./landing-components/NeuralBackground";
 
 /* ─── Fallback campaign data ─────────────────────────────── */
 const fallbackCampaigns: CampaignCardData[] = [
@@ -233,9 +234,12 @@ function HomeContent() {
 
   return (
     <div className="relative min-h-screen bg-[#f8f9fb] dark:bg-[#070b14] text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
+      {/* ─── FLOATING NEURAL SYNAPSE BACKGROUND ─── */}
+      <NeuralBackground />
+
       <PublicNav />
 
-      <main className="relative overflow-hidden">
+      <main className="relative z-10 overflow-hidden">
         {/* ══════════════════════════════════════════════════
             1. HERO SECTION (REFERENCE EXACT)
         ══════════════════════════════════════════════════ */}
@@ -251,7 +255,7 @@ function HomeContent() {
         {/* ══════════════════════════════════════════════════
             3. LIVE MARKETPLACE: OPEN CAMPAIGNS & CAMPAIGNS LIST
         ══════════════════════════════════════════════════ */}
-        <section id="campaigns" className="py-10 lg:py-16 bg-[#f8f9fb] dark:bg-[#070b14] transition-colors">
+        <section id="campaigns" className="py-10 lg:py-16 bg-transparent transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
             {/* Open Campaigns Banner */}
             <OpenCampaignsBanner />
@@ -298,7 +302,9 @@ function HomeContent() {
         </div>
       </main>
 
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
 
       {/* ══════════════════════════════════════════════════
           AUTHENTICATION MODAL

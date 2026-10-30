@@ -1,6 +1,6 @@
 "use client";
 
-import { Play, Mic, X, Check, TrendingUp, CheckCircle2 } from "lucide-react";
+import { Play, Mic, X, Check, TrendingUp, CheckCircle2, ShieldCheck } from "lucide-react";
 
 export function WorkflowStepCards() {
   // 24 equalizer bar heights
@@ -13,7 +13,7 @@ export function WorkflowStepCards() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* ══════════════════════════════════════════════════
-              CARD 01: LONG FOOTAGE (RAW INPUT)
+              CARD 01: LONG FOOTAGE (RAW INPUT - PODCAST LONG VIDEO)
           ══════════════════════════════════════════════════ */}
           <div className="rounded-[28px] border border-neutral-200/90 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-white/10 dark:bg-[#0c182b] flex flex-col justify-between">
             <div>
@@ -32,11 +32,11 @@ export function WorkflowStepCards() {
                 </span>
               </div>
 
-              {/* Video Player Box */}
+              {/* Video Player Box: Real Long-Form Podcast Video */}
               <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-neutral-950 shadow-inner group">
                 <img
-                  src="/step1_mic.jpg"
-                  alt="Podcast studio recording"
+                  src="/step1_podcast_long.jpg"
+                  alt="Podcast long-form video interview"
                   className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/25" />
@@ -49,7 +49,7 @@ export function WorkflowStepCards() {
               <div className="mt-4 flex items-center justify-between text-xs font-bold text-neutral-600 dark:text-neutral-400">
                 <div className="flex items-center gap-1.5">
                   <Mic size={14} className="text-blue-600 dark:text-blue-400" />
-                  <span>Podcast Audio</span>
+                  <span>Podcast Long Video</span>
                 </div>
                 <span className="text-neutral-400 dark:text-neutral-500 font-medium">48 kHz • Stereo</span>
               </div>
@@ -68,7 +68,7 @@ export function WorkflowStepCards() {
           </div>
 
           {/* ══════════════════════════════════════════════════
-              CARD 02: EDITORS CUT SHORTS (9:16 VERTICAL)
+              CARD 02: EDITORS CUT SHORTS (EDITING CLIPS TO REELS)
           ══════════════════════════════════════════════════ */}
           <div className="rounded-[28px] border border-neutral-200/90 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-white/10 dark:bg-[#0c182b] flex flex-col justify-between">
             <div>
@@ -87,11 +87,11 @@ export function WorkflowStepCards() {
                 </span>
               </div>
 
-              {/* Vertical Short Frame */}
+              {/* Vertical Short Frame: Editor actively cutting clip into reel */}
               <div className="relative w-44 mx-auto aspect-[9/13.5] rounded-2xl overflow-hidden shadow-lg border border-purple-200/50 dark:border-purple-900/30 bg-neutral-950">
                 <img
-                  src="/step2_creator.jpg"
-                  alt="Editor cutting short clip"
+                  src="/step2_editor_cutting.jpg"
+                  alt="Editor cutting clips to short reels"
                   className="h-full w-full object-cover"
                 />
 
@@ -123,7 +123,7 @@ export function WorkflowStepCards() {
           </div>
 
           {/* ══════════════════════════════════════════════════
-              CARD 03: PAY FOR VIEWS & EARN (ESCROW PROTECTED)
+              CARD 03: PAY FOR VIEWS & EARN (PAYOUT IMAGE + ESCROW)
           ══════════════════════════════════════════════════ */}
           <div className="rounded-[28px] border border-neutral-200/90 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-white/10 dark:bg-[#0c182b] flex flex-col justify-between">
             <div>
@@ -134,7 +134,7 @@ export function WorkflowStepCards() {
                     03
                   </span>
                   <h3 className="text-lg font-black tracking-tight text-neutral-900 dark:text-white">
-                    Pay for Views & Earn
+                    Pay for Views &amp; Earn
                   </h3>
                 </div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
@@ -142,37 +142,41 @@ export function WorkflowStepCards() {
                 </span>
               </div>
 
-              {/* Real-time Verified Views Box */}
-              <div className="rounded-2xl bg-[#f5f7fa] dark:bg-white/5 p-4 border border-neutral-200/60 dark:border-white/5">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-1">
-                  REAL-TIME VERIFIED VIEWS
-                </p>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-3xl font-black text-neutral-900 dark:text-white">
-                    +150K
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    <TrendingUp size={14} />
-                    <span>Trending</span>
-                  </span>
+              {/* Payout Screen Image Visual */}
+              <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-neutral-950 shadow-inner group mb-3">
+                <img
+                  src="/step3_payout_escrow.jpg"
+                  alt="Verified escrow payout"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-emerald-600/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-black text-white shadow-sm border border-white/15">
+                  <CheckCircle2 size={12} className="text-white" />
+                  <span>Payout Credited</span>
                 </div>
               </div>
 
               {/* Escrow Payout Credited Box */}
-              <div className="mt-3 rounded-2xl bg-[#eaf8f0] dark:bg-emerald-950/20 border border-[#c2eed4] dark:border-emerald-800/40 p-4">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-1">
-                  <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" />
-                  <span>Escrow Payout Credited</span>
+              <div className="rounded-2xl bg-[#eaf8f0] dark:bg-emerald-950/20 border border-[#c2eed4] dark:border-emerald-800/40 p-3.5">
+                <div className="flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-1">
+                  <span className="flex items-center gap-1">
+                    <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
+                    Verified Escrow
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
+                    <TrendingUp size={12} />
+                    +150K Views
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-3xl font-black text-emerald-700 dark:text-emerald-400">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400">
                     ₹18,500
                   </span>
-                  <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md">
-                    <Check size={18} strokeWidth={3} />
+                  <div className="h-7 w-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md">
+                    <Check size={16} strokeWidth={3} />
                   </div>
                 </div>
-                <p className="mt-2 text-[11px] font-medium text-emerald-800/80 dark:text-emerald-300/80">
+                <p className="mt-1.5 text-[11px] font-medium text-emerald-800/80 dark:text-emerald-300/80">
                   85% paid directly to editor wallet • 15% platform cut
                 </p>
               </div>

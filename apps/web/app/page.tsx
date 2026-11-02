@@ -248,9 +248,9 @@ function HomeContent() {
         {/* ══════════════════════════════════════════════════
             2. 3-STEP WORKFLOW CARDS: 01, 02, 03
         ══════════════════════════════════════════════════ */}
-        <div id="how-it-works">
+        {/* <div id="how-it-works">
           <WorkflowStepCards />
-        </div>
+        </div> */}
 
         {/* ══════════════════════════════════════════════════
             3. LIVE MARKETPLACE: OPEN CAMPAIGNS & CAMPAIGNS LIST
